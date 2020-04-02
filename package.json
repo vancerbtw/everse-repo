@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "css:build": "tailwindcss build src/tailwind.css -o public/css/tailwind.css"
+    "dev": "cross-env NODE_ENV=development ts-node-dev --ignore-watch .next --ignore-watch node_modules -P tsconfig.server.json --cls  backend/server.ts",
+    "start": "node backend/server.js",
+    "build:css": "tailwindcss build src/tailwind.css -o public/css/tailwind.css",
+    "build:backend": "tsc -p tsconfig.server.json",
+    "build": "yarn run build:backend && next build"
   },
   "dependencies": {
+    "express": "^4.17.1",
     "next": "9.3.4",
     "react": "16.13.1",
     "react-dom": "16.13.1",
