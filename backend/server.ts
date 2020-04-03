@@ -4,6 +4,7 @@ import next from "next";
 import bodyParser from "body-parser";
 import cors from "cors";
 import path from "path";
+import fs from "await-fs";
 
 //route imports
 
@@ -33,8 +34,19 @@ nextApp.prepare().then(async () => {
     let route = directoryMap[index].split("pages")[1];
     nextRoutes.push(route.split(".tsx")[0]);
   }
+  
+  app.get('/packages', async (req, res) => {
+    let packages = undefined;
+    try {
+      packages = await fs.readFile(path.join(__dirname, "/RepoFiles/packages"), 'utf8');
+    } catch(e) {
+      return res.status(400).send("Internal Server Error");
+    }
 
-  console.log(nextRoutes)
+    packages.replace("{udid}", req.header('x-unique-id'));
+
+    return res.send("googd!");
+  });
 
   app.get(nextRoutes, (req, res) => {
     return handle(req, res);
