@@ -4,14 +4,17 @@ import next from "next";
 import bodyParser from "body-parser";
 import cors from "cors";
 import path from "path";
-import fs from "await-fs";
+import fs from "fs-extra";
 
 //route imports
+import { content } from "./Routes/Content";
+import { developer } from "./Routes/Developer";
 
 //db imports
 
 //helpers imports
 import walk from "./Helpers/Walk";
+import { upload } from "./Helpers/Upload";
 
 //global vars
 const dev = process.env.NODE_ENV === "development";
@@ -22,9 +25,13 @@ const app = express();
 app.use(cors());
 app.set('trust proxy', true);
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(upload);
+
 
 //setting up express router routes
+app.use("/content", content);
+app.use("/developer", developer);
 
 //preparing next routes and next handler
 nextApp.prepare().then(async () => {
@@ -45,8 +52,14 @@ nextApp.prepare().then(async () => {
 
     packages.replace("{udid}", req.header('x-unique-id'));
 
-    return res.send("googd!");
+    res.set("Content-Disposition", "attachment;filename=Packages");
+    res.set("Content-Type", "application/octet-stream");
+    
+    return res.send(packages);
   });
+
+
+  
 
   app.get(nextRoutes, (req, res) => {
     return handle(req, res);

@@ -16,45 +16,4 @@ const pg = knex({
   }
 });
 
-pg.schema.table("files", table => {
-  table.bigIncrements("id");
-
-  //the id of the package in the other table
-  table.string("package");
-
-  //developer name
-  table.string("developer");
-
-  //description description
-  table.string("desc");
-
-  //package name
-  table.string("name");
-
-  //package icon
-  table.string("icon");
-
-  //version that this file is
-  table.string("version");
-
-  //check sums
-  table.string("md5");
-  table.string("sha1");
-  table.string("sha256");
-
-  //size
-  table.bigInteger("size");
-
-  //depends
-  table.string("depends");
-
-  //wether this version is enabled
-  table.boolean("enabled");
-
-  //wether package is accepted to the repo or not
-  table.boolean("accepted");
-
-  table.boolean("paid");
-});
-
 export default pg;
