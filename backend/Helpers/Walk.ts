@@ -7,15 +7,15 @@ export default function walk(dir: string): Promise<string[]> {
       if (error) {
         return reject(error);
       }
-      Promise.all(files.map((file) => {
-        return new Promise((resolve, reject) => {
-          const filepath = path.join(dir, file);
+      Promise.all<string>(files.map((file) => {
+        return new Promise<string>((resolve, reject) => {
+          const filepath: string = path.join(dir, file);
           fs.stat(filepath, (error, stats) => {
             if (error) {
               return reject(error);
             }
             if (stats.isDirectory()) {
-              walk(filepath).then(resolve);
+              walk(filepath).then(() => resolve);
             } else if (stats.isFile()) {
               resolve(filepath);
             }

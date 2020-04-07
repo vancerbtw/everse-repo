@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import path from "path";
 import fs from "fs-extra";
+import jwt from "jsonwebtoken";
 
 //route imports
 import { content } from "./Routes/Content";
@@ -36,7 +37,7 @@ app.use("/developer", developer);
 //preparing next routes and next handler
 nextApp.prepare().then(async () => {
   const directoryMap: string[] = await walk(path.join(__dirname, "../pages/"));
-  let nextRoutes = ["/", "/_next/*"];
+  let nextRoutes = ["/", "/_next/*", "/cydia/assets/back.png"];
   for (let index = 0; index < directoryMap.length; index++) {
     let route = directoryMap[index].split("pages")[1];
     nextRoutes.push(route.split(".tsx")[0]);
@@ -50,16 +51,16 @@ nextApp.prepare().then(async () => {
       return res.status(400).send("Internal Server Error");
     }
 
-    packages.replace("{udid}", req.header('x-unique-id'));
+    const token = jwt.sign({ 
+      udid: req.header('x-unique-id'),
+      model: req.header('x-machine')
+    }, process.env.JWT_SECRET || "");
 
     res.set("Content-Disposition", "attachment;filename=Packages");
     res.set("Content-Type", "application/octet-stream");
     
-    return res.send(packages);
+    return res.send(packages.replace("{udid}", token));
   });
-
-
-  
 
   app.get(nextRoutes, (req, res) => {
     return handle(req, res);
