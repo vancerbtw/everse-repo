@@ -34,6 +34,7 @@ nextApp.prepare().then(async () => {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(upload);
+  app.use("/_next/static", express.static('../.next/static'));
 
   app.use("/content", content);
   app.use("/developer", developer);
