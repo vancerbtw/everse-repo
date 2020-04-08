@@ -9,7 +9,7 @@
     "build:server": "tsc --project tsconfig.server.json",
     "build:next": "next build",
     "build": "npm run build:next && npm run build:server",
-    "start": "NODE_ENV=production node dist/index.js",
+    "start": "NODE_ENV=production node dist/server.js",
     "dev": "cross-env NODE_ENV=development ts-node-dev --ignore-watch .next --ignore-watch node_modules --ignore-watch ./backend/packages --ignore-watch ./backend/temp -P tsconfig.server.json --cls  backend/server.ts",
     "postinstall": "node post.js"
   },
