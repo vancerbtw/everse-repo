@@ -36,13 +36,6 @@ app.use("/developer", developer);
 
 //preparing next routes and next handler
 nextApp.prepare().then(async () => {
-  // const directoryMap: string[] = await walk(path.join(__dirname, "../pages/"));
-  let nextRoutes = ["/", "/_next/*", "/cydia/assets/back.png", "/cydia/depiction"];
-  // for (let index = 0; index < directoryMap.length; index++) {
-  //   let route = directoryMap[index].split("pages")[1];
-  //   nextRoutes.push(route.split(".tsx")[0]);
-  // }
-  
   app.get('/packages', async (req, res) => {
     let packages = undefined;
     try {
@@ -62,7 +55,7 @@ nextApp.prepare().then(async () => {
     return res.send(packages.replace("{udid}", token));
   });
 
-  app.get(nextRoutes, (req, res) => {
+  app.get("*", (req, res) => {
     return handle(req, res);
   });
 
