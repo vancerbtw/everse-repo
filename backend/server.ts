@@ -62,7 +62,7 @@ nextApp.prepare().then(async () => {
     return handle(req, res);
   });
 
-  app.listen(process.env.PORT || 3001, () => {
-    console.log(`Listening on localhost:${3001}`);
+  app.listen(process.env.PORT || 3000, () => {
+    console.log(`Listening on localhost:${process.env.PORT || 3000}`);
   });
 });
