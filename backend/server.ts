@@ -31,11 +31,12 @@ app.use(upload);
 
 
 //setting up express router routes
-app.use("/content", content);
-app.use("/developer", developer);
 
 //preparing next routes and next handler
 nextApp.prepare().then(async () => {
+  app.use("/content", content);
+  app.use("/developer", developer);
+  
   app.get('/packages', async (req, res) => {
     let packages = undefined;
     try {
