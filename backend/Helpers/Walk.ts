@@ -23,7 +23,7 @@ export default function walk(dir: string): Promise<string[]> {
         });
       }))
       .then((foldersContents) => {
-        resolve(foldersContents.reduce((all, folderContents) => all.concat(folderContents), []));
+        resolve(foldersContents.reduce((all, folderContents) => all.concat(folderContents), [] as string[]));
       });
     });
   });
