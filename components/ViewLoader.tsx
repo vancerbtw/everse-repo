@@ -91,16 +91,16 @@ class ViewLoader extends React.Component<ViewProps, ViewState> {
   render() {
     switch (this.props.view.class) {
       case "DepictionHeaderView":
-        return <DepictionHeaderView title={this.props.view.title} useBoldText={this.props.view.useBoldText} />;
+        return <DepictionHeaderView title={this.props.view.title || ""} useBoldText={this.props.view.useBoldText} />;
 
       case "DepictionMarkdownView": 
-        return <DepictionMarkdownView markdown={this.props.view.markdown} />;
+        return <DepictionMarkdownView markdown={this.props.view.markdown || ""} />;
     
       case "DepictionScreenshotsView":
-        return <DepictionScreenshotsView itemCornerRadius={this.props.view.itemCornerRadius} screenshots={this.props.view.screenshots} itemSize={this.props.view.itemSize} showScreenshots={this.props.showScreenshots}></DepictionScreenshotsView>
+        return <DepictionScreenshotsView itemCornerRadius={this.props.view.itemCornerRadius || 0} screenshots={this.props.view.screenshots || []} itemSize={this.props.view.itemSize || ""} showScreenshots={this.props.showScreenshots}></DepictionScreenshotsView>
       
       case "DepictionImageView":
-        return <DepictionImageView URL={this.props.view.URL} width={this.props.view.width} height={this.props.view.height} alignment={this.props.view.alignment} />
+        return <DepictionImageView URL={this.props.view.URL || ""} width={this.props.view.width || 0} height={this.props.view.height || 0} alignment={this.props.view.alignment} />
 
       case "DepictionSpacerView":
         return <DepictionSpacerView spacing={this.props.view.spacing} />
@@ -109,13 +109,13 @@ class ViewLoader extends React.Component<ViewProps, ViewState> {
         return <div className="DepictionSeparatorView"></div>
 
       case "DepictionTableTextView":
-        return <DepictionTableTextView title={this.props.view.title} text={this.props.view.text} />
+        return <DepictionTableTextView title={this.props.view.title || ""} text={this.props.view.text || ""} />
 
       case "DepictionTableButtonView":
         return <DepictionTableButtonView title={this.props.view.title} action={this.props.view.action} tintColor={this.props.view.tintColor} />
 
       case "DepictionSubheaderView":
-        return <DepictionSubheaderView title={this.props.view.title} useBoldText={this.props.view.useBoldText} useMargins={this.props.view.useMargins}/>
+        return <DepictionSubheaderView title={this.props.view.title || ""} useBoldText={this.props.view.useBoldText} useMargins={this.props.view.useMargins}/>
 
       default:
         break;

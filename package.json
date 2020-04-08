@@ -13,8 +13,13 @@
     "dev": "cross-env NODE_ENV=development ts-node-dev --ignore-watch .next --ignore-watch node_modules --ignore-watch ./backend/packages --ignore-watch ./backend/temp -P tsconfig.server.json --cls  backend/server.ts"
   },
   "dependencies": {
+    "@types/cors": "^2.8.6",
     "@types/express": "^4.17.4",
+    "@types/fs-extra": "^8.1.0",
+    "@types/jsonwebtoken": "^8.3.9",
     "@types/multer": "^1.4.2",
+    "@types/pg": "^7.14.3",
+    "@types/tar": "^4.0.3",
     "ar": "^0.0.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
@@ -31,6 +36,7 @@
     "node-postgres": "^0.1.4",
     "pg": "^8.0.0",
     "postcss-preset-env": "^6.7.0",
+    "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-showdown": "^2.0.3",

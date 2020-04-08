@@ -19,7 +19,7 @@ developer.post("/upload", auth, async (req, res) => {
       });
     }
 
-    if (req.body.update && !req.user.developer) {
+    if (req.body.update && !req.user?.developer) {
       return res.status(200).json({
         success: false,
         error: "User must be a developer to upload an update to a package"
@@ -67,13 +67,13 @@ developer.post("/upload", auth, async (req, res) => {
       await pg("files").insert({
         file: parseInt(fileID[0]),
         package: debData.control.package,
-        developer: req.user.email,
+        developer: req.user?.email,
         desc: debData.control.description,
         name: debData.control.name,
         version: debData.control.version,
         size: debData.size,
         depends: debData.control.depends,
-        section: debData.control.section.toLowerCase() === "themes" ? "Themes": "Tweaks",
+        section: debData.control.section?.toLowerCase() === "themes" ? "Themes": "Tweaks",
         architecture: debData.control.architecture,
         enabled: false,
         accepted: false,
@@ -110,7 +110,7 @@ developer.post("/packages", async (req, res) => {
 });
 
 developer.post("/addDevice/:user", async (req, res) => {
-  if (await addDevice({ udid: req.header("x-unique-id"), model: req.header('x-machine') }, parseInt(req.params.user))) {
+  if (await addDevice({ udid: req.header("x-unique-id") || "", model: req.header('x-machine') || "" }, parseInt(req.params.user))) {
     return res.status(200).json({
       success: true
     });
@@ -123,7 +123,7 @@ developer.post("/addDevice/:user", async (req, res) => {
 });
 
 developer.post("/get/device", async (req, res) => {
-  const user = await getUser(req.header("x-unique-id"), req.header('x-machine'));
+  const user = await getUser(req.header("x-unique-id") || "", req.header('x-machine') || "");
 
   return res.status(200).json(user)
 })

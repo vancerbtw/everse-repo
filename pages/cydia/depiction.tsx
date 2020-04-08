@@ -19,7 +19,7 @@ type DepictionState = {
     class: string;
     headerImage?: string;
     tabs?: DepictionTab[];
-  },
+  } | undefined,
   query?: URLSearchParams,
   tab: number,
   screenshot: string | undefined,
@@ -153,23 +153,23 @@ class Depiction extends React.Component<DepictionProps, DepictionState> {
 
         <div className="contentWrapper">
           <div className="headerSection">
-            <div id="tweakIcon" style={{backgroundImage: this.state.query.get("icon") ? `url(${this.state.query.get("icon")})`: ""}}></div>
-            <h1 id="tweakName">{this.state.query.get("name") || ""}</h1>
-            <h4 id="developerName">{this.state.query.get("developer") || ""}</h4>
+            <div id="tweakIcon" style={{backgroundImage: this.state.query?.get("icon") ? `url(${this.state.query.get("icon")})`: ""}}></div>
+            <h1 id="tweakName">{this.state.query?.get("name") || ""}</h1>
+            <h4 id="developerName">{this.state.query?.get("developer") || ""}</h4>
             <div className="priceButton">Free</div>
           </div>
           <div className="headerPillSelector">
-            { this.state.config.tabs.map((tab, i) => {
+            { this.state.config.tabs?.map((tab, i) => {
               return (
                 <div className="pillText" key={i} id={`${tab.tabname}Button`} onClick={() => {
                   this.setState({ tab: i });
-                }} style={{left: (50 / this.state.config.tabs.length) * (2 * i + 1) + "%", color: this.state.tab === i ? "var(--tint-color)": ""}}>{tab.tabname}</div>
+                }} style={{left: (50 / this.state.config?.tabs!.length || 0) * (2 * i + 1) + "%", color: this.state.tab === i ? "var(--tint-color)": ""}}>{tab.tabname}</div>
               );
             }) }
-            <div className="pillSelectorLine" style={{left: (50 / this.state.config.tabs.length) * (2 * this.state.tab + 1) + "%"}}></div>
+            <div className="pillSelectorLine" style={{left: (50 / this.state.config.tabs!.length || 0) * (2 * this.state.tab + 1) + "%"}}></div>
           </div>
           <div id="mainWrapper">
-            { this.state.config.tabs.map((tab, i) => {
+            { this.state.config.tabs?.map((tab, i) => {
               if (i == this.state.tab) {
                 return (
                   <div className="tabContent" id={`${tab.tabname}Content`} key={i}>

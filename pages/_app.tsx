@@ -1,7 +1,13 @@
 import "../css/sileo.css";
+import React from "react";
+import PropTypes from "prop-types";
 
-function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+interface Comp {
+  // any other props that come into the component
 }
+
+const MyApp = ( Component: React.ComponentType, pageProps: any) => (
+  <Component {...pageProps} />
+)
 
 export default MyApp
