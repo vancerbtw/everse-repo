@@ -19,7 +19,7 @@ import { upload } from "./Helpers/Upload";
 
 //global vars
 const dev = process.env.NODE_ENV === "development";
-const nextApp = next({ dev });
+const nextApp = next({ customServer: true,  dev });
 const handle = nextApp.getRequestHandler();
 const app = express();
 
@@ -36,7 +36,7 @@ app.use(upload);
 nextApp.prepare().then(async () => {
   app.use("/content", content);
   app.use("/developer", developer);
-  
+
   app.get('/packages', async (req, res) => {
     let packages = undefined;
     try {
