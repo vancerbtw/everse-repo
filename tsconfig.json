@@ -19,11 +19,12 @@
     "jsx": "preserve"
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "node_modules/ar/lib/ar.d.ts"
   ],
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx", "pages/_app.js"
+    "**/*.tsx", "pages/_app.js", "pages/_app.tsx.txt"
   ]
 }

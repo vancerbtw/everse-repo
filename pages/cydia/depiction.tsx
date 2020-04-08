@@ -26,8 +26,8 @@ type DepictionState = {
   borderRadius: string
 };
 
-class Depiction extends React.Component<DepictionProps, DepictionState> {
-  constructor(props: any) {
+export default class Depiction extends React.Component<DepictionProps, DepictionState> {
+  constructor(props: DepictionProps) {
     super(props);
 
     this.state = {
@@ -190,6 +190,3 @@ class Depiction extends React.Component<DepictionProps, DepictionState> {
     );
   }
 }
-
-export default Depiction;
-

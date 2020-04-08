@@ -84,7 +84,7 @@ type ViewState = {
 };
 
 class ViewLoader extends React.Component<ViewProps, ViewState> {
-  constructor(props: any) {
+  constructor(props: ViewProps) {
     super(props);
   }
 
