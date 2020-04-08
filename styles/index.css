@@ -370,8 +370,8 @@ a {
   min-height: 16px;
   background-color: #2CB1BE; /*fallback for IE*/
   background-color: var(--tint-color);
-  mask-image: url("back.png");
-  -webkit-mask-image: url("back.png");
+  mask-image: url("/assets/back.png");
+  -webkit-mask-image: url("/assets/back.png");
   mask-mode: alpha;
   -webkit-mask-mode: alpha;
   mask-size: cover;
