@@ -31,7 +31,7 @@ content.get("/package/:id/", async (req, res) => {
 
   if (item.paid) {
     //we are getting the user that this device belongs to
-    const user = await getUser(req.header("x-unique-id"), req.header('x-machine'));
+    const user = await getUser(req.header("x-unique-id")!, req.header('x-machine')!);
 
     //if there is no user then this device has not been linked to an account
     if (!user) return res.status(400).send("This device is not linked with an account, please sign in.");
