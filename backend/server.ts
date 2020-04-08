@@ -21,19 +21,20 @@ import { upload } from "./Helpers/Upload";
 const dev = process.env.NODE_ENV === "development";
 const nextApp = next({ customServer: true,  dev });
 const handle = nextApp.getRequestHandler();
-const app = express();
-
-app.use(cors());
-app.set('trust proxy', true);
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(upload);
 
 
 //setting up express router routes
 
 //preparing next routes and next handler
 nextApp.prepare().then(async () => {
+  const app = express();
+
+  app.use(cors());
+  app.set('trust proxy', true);
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: false }));
+  app.use(upload);
+
   app.use("/content", content);
   app.use("/developer", developer);
 
