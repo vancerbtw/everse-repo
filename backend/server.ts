@@ -33,32 +33,32 @@ nextApp.prepare().then(async () => {
   app.set('trust proxy', true);
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
-  // app.use(upload);
-  // app.use("/_next/static/", express.static('../.next/static/'));
+  app.use(upload);
+  app.use("/_next/static/", express.static('../.next/static/'));
 
-  // app.use("/content", content);
-  // app.use("/developer", developer);
+  app.use("/content", content);
+  app.use("/developer", developer);
 
-  // app.get('/packages', async (req, res) => {
-  //   let packages = undefined;
-  //   try {
-  //     packages = await fs.readFile(path.join(__dirname, "/RepoFiles/packages"), 'utf8');
-  //   } catch(e) {
-  //     return res.status(400).send("Internal Server Error");
-  //   }
+  app.get('/packages', async (req, res) => {
+    let packages = undefined;
+    try {
+      packages = await fs.readFile(path.join(__dirname, "/RepoFiles/packages"), 'utf8');
+    } catch(e) {
+      return res.status(400).send("Internal Server Error");
+    }
 
-  //   const token = jwt.sign({ 
-  //     udid: req.header('x-unique-id'),
-  //     model: req.header('x-machine')
-  //   }, process.env.JWT_SECRET || "");
+    const token = jwt.sign({ 
+      udid: req.header('x-unique-id'),
+      model: req.header('x-machine')
+    }, process.env.JWT_SECRET || "");
 
-  //   res.set("Content-Disposition", "attachment;filename=Packages");
-  //   res.set("Content-Type", "application/octet-stream");
+    res.set("Content-Disposition", "attachment;filename=Packages");
+    res.set("Content-Type", "application/octet-stream");
     
-  //   return res.send(packages.replace("{udid}", token));
-  // });
+    return res.send(packages.replace("{udid}", token));
+  });
 
-  app.get(['/cydia/depiction', '/', '/_next/*'], (req, res) => {
+  app.get("*", (req, res) => {
     return handle(req, res);
   });
 
