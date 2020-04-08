@@ -19,7 +19,7 @@ import { upload } from "./Helpers/Upload";
 
 //global vars
 const dev = process.env.NODE_ENV === "development";
-const nextApp = next({ dev });
+const nextApp = next({ customServer: true,  dev });
 const handle = nextApp.getRequestHandler();
 
 
@@ -62,7 +62,7 @@ nextApp.prepare().then(async () => {
     return handle(req, res);
   });
 
-  app.listen(process.env.PORT || 3000, () => {
-    console.log(`Listening on localhost:${process.env.PORT || 3000}`);
+  app.listen(process.env.PORT || 3001, () => {
+    console.log(`Listening on localhost:${3001}`);
   });
 });
