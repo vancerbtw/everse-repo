@@ -43,3 +43,30 @@ content.get("/package/:id/", async (req, res) => {
 
   return res.status(200).sendFile(path.join(__dirname, '../packages', file.identifier));
 });
+
+content.get("/depiction", async (req, res) => {
+  if (req.query.id) {
+    const file = await pg("files").select().innerJoin("uploads", "files.file", "uploads.id").where({ files_id: req.query.id, accepted: true }).first();
+
+    if (!file) return res.status(400).send("Invalid depiction requested");
+
+    const item = await pg("packages").select().innerJoin("accounts", "packages.id", "accounts.id").where({ identifier: file.package, active: true, pending: false }).first();
+
+    if (!item) return res.status(400).json({ success: false, error: "Inalid Package" });
+
+    return res.status(200).json({ success: true, depiction: JSON.parse(item.depiction), developer: item.username || "", name: item.name || "", icon: item.icon || "" });
+  } else if(req.query.package) {
+    const item = await pg("packages").select().where({ identifier: req.query.package, active: true, pending: false }).innerJoin("accounts", "packages.id", "accounts.id").first();
+
+    if (!item) return res.status(400).json({ success: false, error: "Inalid Package query param" });    
+
+    if (!item) return res.status(400).json({ success: false, error: "Inalid Package" });
+
+    return res.status(200).json({ success: true, depiction: JSON.parse(item.depiction) || "", developer: item.username || "", name: item.name || "", icon: item.icon || "" });
+  } else {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid request, missing 'id' or 'package' query param."
+    });
+  }
+});

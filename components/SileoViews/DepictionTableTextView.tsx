@@ -15,10 +15,12 @@ class DepictionTableTextView extends React.Component<ViewProps, ViewState> {
   render() {
     return <div className="DepictionTableTextView">
       <table className="depictionTable">
-        <tr>
-          <td>{this.props.title}</td>
-          <td>{this.props.text}</td>
-        </tr>
+        <tbody>
+          <tr>
+            <td>{this.props.title}</td>
+            <td>{this.props.text}</td>
+          </tr>
+        </tbody>
       </table>
     </div>;
   }

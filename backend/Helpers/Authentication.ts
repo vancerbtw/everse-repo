@@ -46,7 +46,8 @@ export default async function verify(req: Request, res: Response, next: NextFunc
     }
 
     next();
-  } catch {
+  } catch(e) {
+    console.log(e)
     return res.status(400).json({
       success: false,
       error: "Error decoding token"

@@ -1,5 +1,6 @@
 import React from "react";
 import ViewLoader from "../../components/ViewLoader";
+import { host } from "../../backend/Helpers/Host";
 
 interface DepictionView {
   class: string;
@@ -23,7 +24,10 @@ type DepictionState = {
   query?: URLSearchParams,
   tab: number,
   screenshot: string | undefined,
-  borderRadius: string
+  borderRadius: string,
+  icon: string,
+  name: string,
+  developer: string
 };
 
 export default class Depiction extends React.Component<DepictionProps, DepictionState> {
@@ -34,17 +38,26 @@ export default class Depiction extends React.Component<DepictionProps, Depiction
       config: undefined,
       tab: 0,
       screenshot: undefined,
-      borderRadius: "8px"
+      borderRadius: "8px",
+      icon: "",
+      name: "",
+      developer: ""
     };
 
     this.showScreenshots = this.showScreenshots.bind(this);
   }
 
   componentDidMount() {
-    fetch("https://raw.githubusercontent.com/PINPAL/Sileo-Depiction-WebViews/996b2b375b0c61bcb3af61ee518488c1c670fccb/packages/shortlook/config.json").then((res) => res.text()).then((config) => {
-      const json: { class: string; headerImage?: string; tabs?: DepictionTab[]; } = JSON.parse(config);
-      console.log(json)
-      this.setState({ config: json, query: new URLSearchParams(window.location.search) });
+    const queries = new URLSearchParams(window.location.search);
+    const id = queries.get("id") ? "id=" + queries.get("id") + "&": "";
+    const item = queries.get("package") ? "package=" + queries.get("package"): "";
+    fetch(`${host}/content/depiction?${id}${item}`).then((res) => {console.log(res); return res.json()}).then((config) => {
+      const json: { class: string; headerImage?: string; tabs?: DepictionTab[]; } = JSON.parse(config.depiction);
+      const name: string = config.name;
+      const developer: string = config.developer;
+      const icon: string = config.icon;
+
+      this.setState({ config: json, query: new URLSearchParams(window.location.search), name, developer, icon });
     }).catch(e => {
       console.log(e);
     });
@@ -153,9 +166,9 @@ export default class Depiction extends React.Component<DepictionProps, Depiction
 
         <div className="contentWrapper">
           <div className="headerSection">
-            <div id="tweakIcon" style={{backgroundImage: this.state.query?.get("icon") ? `url(${this.state.query.get("icon")})`: ""}}></div>
-            <h1 id="tweakName">{this.state.query?.get("name") || ""}</h1>
-            <h4 id="developerName">{this.state.query?.get("developer") || ""}</h4>
+            <div id="tweakIcon" style={{backgroundImage: this.state.icon ? `url(${this.state.icon})`: ""}}></div>
+            <h1 id="tweakName">{this.state.name}</h1>
+            <h4 id="developerName">{this.state.developer}</h4>
             <div className="priceButton">Free</div>
           </div>
           <div className="headerPillSelector">

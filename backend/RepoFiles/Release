@@ -1,0 +1,8 @@
+Origin: Everse
+Label: Everse
+Suite: stable
+Version: 1.1
+Codename: ioseverse
+Architectures: iphoneos-arm
+Components: main
+Description: Where great developers deliver you great products!

@@ -1,7 +1,7 @@
 import express from "express";
 import pg from "../Database/pg";
 import auth from "../Helpers/Authentication";
-import sanitize from "sanitize-filename";
+import path from "path";
 import fs from "fs-extra";
 import { join } from "path";
 import { debScan } from "../Helpers/DebScan";
@@ -80,7 +80,8 @@ developer.post("/upload", auth, async (req, res) => {
         paid: false,
         md5: debData.md5,
         sha1: debData.sha1,
-        sha256: debData.sha256
+        sha256: debData.sha256,
+        change: "Initial commit"
       });
       
       return res.status(200).json({
@@ -126,4 +127,32 @@ developer.post("/get/device", async (req, res) => {
   const user = await getUser(req.header("x-unique-id") || "", req.header('x-machine') || "");
 
   return res.status(200).json(user)
-})
+});
+
+developer.post("/update/depiction", auth, async (req, res) => {
+  if (!req.user?.developer) return res.status(400).json({ success: false, error: "User is not a developer" });
+  if (!req.body.id) return res.status(400).json({ success: false, error: "Missing 'id' on request body." });
+  // if (!req.body.depiction) return res.status(400).json({ success: false, error: "Missing 'depiction' on request body." });
+  
+  //here we are checking for if the package exists and the user is the developer
+  const item = await pg("packages").select().where({ id: req.body.id, developer: req.user.id }).first();
+  if (!item) return res.status(400).json({ success: false, error: "Invalid Package requested to update depiction." });
+
+  // try {
+  //   JSON.parse(req.body.depiction);
+  // } catch {
+  //   return res.status(400).json({ success: false, error: "Invalid depiction." });
+  // }
+
+  const depiction = await fs.readFile(path.join(__dirname, "./depiction.json"), "utf8");
+
+  try {
+    await pg("packages").where({ id: item.id }).update({
+      depiction: JSON.stringify(depiction)
+    });
+  } catch {
+    return res.status(400).json({ success: false, error: "Invalid depiction." });
+  }
+
+  return res.status(200).json({ success: true });
+});

@@ -39,7 +39,7 @@ nextApp.prepare().then(async () => {
   app.use("/content", content);
   app.use("/developer", developer);
 
-  app.get('/packages', async (req, res) => {
+  app.get('/Packages', async (req, res) => {
     let packages = undefined;
     try {
       packages = await fs.readFile(path.join(__dirname, "/RepoFiles/packages"), 'utf8');
@@ -56,6 +56,20 @@ nextApp.prepare().then(async () => {
     res.set("Content-Type", "application/octet-stream");
     
     return res.send(packages.replace("{udid}", token));
+  });
+
+  app.get("/Release", async (req, res) => {
+    let release;
+    try {
+      release = await fs.readFile(path.join(__dirname, "/RepoFiles/release"), 'utf8');
+    } catch(e) {
+      return res.status(400).send("Internal Server Error");
+    }
+
+    res.set("Content-Disposition", "attachment;filename=Release");
+    res.set("Content-Type", "application/octet-stream");
+
+    return res.send(release);
   });
 
   app.get("*", (req, res) => {
