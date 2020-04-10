@@ -60,7 +60,9 @@ nextApp.prepare().then(async () => {
 
   app.get("/Release", async (req, res) => {
     let release;
+    console.log(path.join(__dirname, "/RepoFiles/release"));
     try {
+      console.log(path.join(__dirname, "/RepoFiles/release"));
       release = await fs.readFile(path.join(__dirname, "/RepoFiles/release"), 'utf8');
     } catch(e) {
       return res.status(400).send("Internal Server Error");
