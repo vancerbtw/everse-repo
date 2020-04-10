@@ -2,6 +2,5 @@ node_modules
 .next
 .env
 backend/packages
-backend/RepoFiles/packages
 dist
 _next
