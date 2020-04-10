@@ -59,13 +59,15 @@ nextApp.prepare().then(async () => {
   });
 
   app.get("/Release", async (req, res) => {
-    let release = await fs.readFile(path.join(__dirname, "/RepoFiles/release"), 'utf8');
-    // try {
-    //   console.log(path.join(__dirname, "/RepoFiles/release"));
-    //   release = await fs.readFile(path.join(__dirname, "/RepoFiles/release"), 'utf8');
-    // } catch(e) {
-    //   return res.status(400).send("Internal Server Error");
-    // }
+    let release;
+    console.log(path.join(__dirname, "/RepoFiles/release"));
+    try {
+      console.log(path.join(__dirname, "/RepoFiles/release"));
+      release = await fs.readFile(path.join(__dirname, "/RepoFiles/release"), 'utf8');
+    } catch(e) {
+      console.log(e)
+      return res.status(400).send("Internal Server Error");
+    }
 
     res.set("Content-Disposition", "attachment;filename=Release");
     res.set("Content-Type", "application/octet-stream");
