@@ -677,9 +677,59 @@ left: 24px;
 }
 
 .viewerScreenshot {
-  height: 90%;
+  height: 100%;
   width: auto;
 }
+
+@media all and (orientation:portrait) {
+  /* Style adjustments for portrait mode goes here */
+  .viewerScreenshot {
+    height: auto;
+    width: 60%;
+  }
+
+  .screenshotViewer {
+    align-items: flex-start;
+    margin-top: 10vh;
+  }
+}
+  
+@media all and (orientation:landscape) {
+  /* Style adjustments for landscape mode goes here */
+  .viewerScreenshot {
+    height: 75%;
+    width: auto;
+  }
+}
+
+.cydia-banner {
+  width: 100%;
+  min-height: 35px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: var(--tint-color);
+  z-index: 200;
+}
+
+.cydia-button {
+  height: 80%;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.cydia-button .priceButton {
+  background-color: white;
+  color: var(--tint-color)
+}
+
+.cydia-text {
+  color: white;
+  margin-right: auto;
+  margin-left: 10px;
+  font-weight: 600;
+}
+
 
 /* GLOBAL */
 

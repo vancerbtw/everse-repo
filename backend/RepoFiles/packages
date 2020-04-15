@@ -3,11 +3,11 @@ Package: com.megadev.test
 Description: A lockscreen quicklauncher inspired by BerryC8. A beautiful way of launching your apps. Just drag them down to open. There are many cusomisation options in the settings!
 Architecture: iphoneos-arm
 Section: Tweaks
-Depiction: https://repo.everse.dev/cydia/depiction?package=com.megadev.test?token={udid}
+Depiction: http://192.168.7.50:3000/cydia/depiction?package=com.megadev.test&token={udid}
 Icon: null
 SileoDepiction: https://repo.everse.dev/sileo/depiction?package=com.megadev.test
 Version: 1.1-25
-Filename: /content/package/2
+Filename: /content/package/1
 Size: 4194
 MD5sum: 30e8f61e345b05f265186872edfa9f80
 SHA1: da5981e2de01173d131d1d83ce197cbb9656047d

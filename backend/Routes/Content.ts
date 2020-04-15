@@ -62,7 +62,7 @@ content.get("/depiction", async (req, res) => {
 
     if (!item) return res.status(400).json({ success: false, error: "Inalid Package" });
 
-    return res.status(200).json({ success: true, depiction: JSON.parse(item.depiction) || "", developer: item.username || "", name: item.name || "", icon: item.icon || "" });
+    return res.status(200).json({ success: true, depiction: JSON.parse(item.depiction) || "", developer: item.username || "", name: item.name || "", identifier: item.identifier || "", icon: item.icon || "" });
   } else {
     return res.status(400).json({
       success: false,
