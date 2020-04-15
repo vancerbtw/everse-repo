@@ -16,7 +16,7 @@ class DepictionMarkdownView extends React.Component<ViewProps, ViewState> {
 
   render() {
     return (
-      <div className="DepictionMarkdownView">
+      <div className="DepictionMarkdownView markdown">
         <MarkdownView markdown={this.props.markdown}/>
       </div>
     );
