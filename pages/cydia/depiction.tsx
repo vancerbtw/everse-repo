@@ -66,6 +66,10 @@ export default class Depiction extends React.Component<DepictionProps, Depiction
     this.showScreenshots = this.showScreenshots.bind(this);
   }
 
+  componentDidUpdate() {
+    console.log(this.props)
+  }
+
   componentDidMount() {
     window.addEventListener("focus", () => {
       const queries = new URLSearchParams(window.location.search);
@@ -367,7 +371,7 @@ export default class Depiction extends React.Component<DepictionProps, Depiction
                       { tab.views.map((view, i) => {
                         return (
                           <div key={i}>
-                            <ViewLoader view={view} showScreenshots={this.showScreenshots} />
+                            <ViewLoader view={view} showScreenshots={this.showScreenshots}  />
                           </div>
                         );
                       }) }

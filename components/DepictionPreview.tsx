@@ -1,6 +1,7 @@
 import React from "react";
 import ViewLoader from "./ViewLoader";
 import Head from 'next/head'
+import { DropResult, DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DraggableStateSnapshot } from "react-beautiful-dnd";
 
 interface DepictionView {
   class: string;
@@ -41,6 +42,35 @@ type DepictionState = {
   user: { email: string, username: string, developer: Boolean } | undefined
 };
 
+const getItems = (count: number) =>
+  Array.from({ length: count }, (v, k) => k).map(k => ({
+    id: `item-${k}`,
+    content: `item ${k}`
+  }));
+
+const reorder = (list: DepictionView[], startIndex: number, endIndex: number) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
+
+const grid = 8;
+
+const getItemStyle = (isDragging: any, draggableStyle: any) => ({
+  // some basic styles to make the items look a bit nicer
+  userSelect: "none",
+  padding: grid * 2,
+  margin: `0 0 ${grid}px 0`,
+
+  // change background colour if dragging
+  background: isDragging ? "lightgreen" : "grey",
+
+  // styles we need to apply on draggables
+  ...draggableStyle
+});
+
 export default class Preview extends React.Component<DepictionProps, DepictionState> {
   constructor(props: DepictionProps) {
     super(props);
@@ -57,8 +87,32 @@ export default class Preview extends React.Component<DepictionProps, DepictionSt
       user: undefined
     };
 
+    this.onDragEnd = this.onDragEnd.bind(this);
     this.showScreenshots = this.showScreenshots.bind(this);
   }
+
+  onDragEnd(result: DropResult) {
+    // dropped outside the list
+    if (!result.destination) {
+      return;
+    }
+
+    let depiction = this.state.config
+
+    const items = reorder(
+      depiction.tabs![this.state.tab].views,
+      result.source.index,
+      result.destination.index
+    );
+
+    depiction.tabs![this.state.tab].views = items;
+
+    this.setState({
+      config: depiction
+    });
+  }
+
+  
 
   showScreenshots(url: string, borderRadius: string) {
     this.setState({
@@ -133,13 +187,35 @@ export default class Preview extends React.Component<DepictionProps, DepictionSt
                 if (i == this.state.tab) {
                   return (
                     <div className="tabContent" id={`${tab.tabname}Content`} key={i}>
-                      { tab.views.map((view, i) => {
-                        return (
-                          <div key={i}>
-                            <ViewLoader view={view} showScreenshots={this.showScreenshots} />
-                          </div>
-                        );
-                      }) }
+                      <DragDropContext onDragEnd={this.onDragEnd}>
+                        <Droppable droppableId="droppable">
+                          {(provided: DroppableProvided, snapshot) => (
+                            <div
+                              {...provided.droppableProps}
+                              ref={provided.innerRef}
+                            >
+                            { tab.views.map((view, i) => (
+                                <Draggable key={i} draggableId={`${i}`} index={i}>
+                                  {(provided: DraggableProvided, snapshotDraggable:DraggableStateSnapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      style={getItemStyle(
+                                        snapshotDraggable.isDragging,
+                                        provided.draggableProps.style
+                                      )}
+                                    >
+                                      <ViewLoader view={view} showScreenshots={this.showScreenshots} provided={provided} snapshot={snapshotDraggable} />
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                      </DragDropContext>
                     </div>
                   );
                 }

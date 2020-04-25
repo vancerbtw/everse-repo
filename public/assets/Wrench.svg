@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="linear-gradient" y1="1" x2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#f6c443"/>
+      <stop offset="1" stop-color="#f9df4a"/>
+    </linearGradient>
+    <filter id="Path_11" x="178.481" y="179.122" width="666.397" height="666.397" filterUnits="userSpaceOnUse">
+      <feOffset input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feFlood flood-opacity="0.051"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="Wrench" transform="translate(404.511 -850)">
+    <rect id="Rectangle_1" data-name="Rectangle 1" width="1024" height="1024" transform="translate(-404.511 850)" fill="url(#linear-gradient)"/>
+    <g transform="matrix(1, 0, 0, 1, -404.51, 850)" filter="url(#Path_11)">
+      <path id="Path_11-2" data-name="Path 11" d="M45.115,630.592A73.928,73.928,0,0,1,7.808,529.443a74.6,74.6,0,0,1,20.911-25.378L290.842,275.412a185.7,185.7,0,0,1-9.269-18.861A184.809,184.809,0,0,1,501.738,6.85a8.616,8.616,0,0,1,4.357,3.028,8.5,8.5,0,0,1-.459,10.818l.007.007-.171.171c-.092.1-.191.2-.3.3l-84.984,84.981-6.556,6.536a28.343,28.343,0,0,0-7.829,25.616l11.808,60.057a28.362,28.362,0,0,0,19.571,21.689l51.649,15.79a28.4,28.4,0,0,0,28.351-7.035l43.377-43.187a28.831,28.831,0,0,0,2.016-2.224l52.577-52.577,0,0A8.528,8.528,0,0,1,629.49,134.5l.015,0A184.715,184.715,0,0,1,361.253,345.708L128.217,612.858l-.144-.144a73.948,73.948,0,0,1-82.958,17.878Z" transform="translate(193.48 194.12)" fill="#fff"/>
+    </g>
+  </g>
+</svg>
