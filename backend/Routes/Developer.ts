@@ -6,6 +6,9 @@ import fs from "fs-extra";
 import { join } from "path";
 import { debScan } from "../Helpers/DebScan";
 import { generatePackages } from "../Helpers/Packages";
+import { space } from "../Helpers/Spaces";
+import randomstring from "randomstring";
+import fetch from "node-fetch";
 import { removeUserDevices, removeDevice, addDevice, getDevices, getUser } from "../Helpers/Device";
 
 export const developer = express.Router();
@@ -38,7 +41,7 @@ developer.post("/upload", auth, async (req, res) => {
       }
     }
 
-    const packageName = `${Date.now()}.deb`;
+    const packageName = `${Date.now()}${randomstring.generate(15)}.deb`;
     await fs.writeFile(join(__dirname, `../packages/${packageName}`), req.file.buffer);
 
     const fileID = await pg("uploads").insert({
@@ -83,7 +86,23 @@ developer.post("/upload", auth, async (req, res) => {
         sha256: debData.sha256,
         change: "Initial commit"
       });
+
       
+      var params = {
+        Bucket: "content-cdn-everse-0",
+        Key: packageName,
+        Body: req.file.stream,
+        ACL: 'private'
+      };
+      try {
+        await space.putObject(params).promise();
+      } catch {
+        return res.status(400).json({
+          success: false,
+          error: "Internal upload error"
+        });
+      }
+
       return res.status(200).json({
         success: true
       });
@@ -129,6 +148,35 @@ developer.post("/get/device", async (req, res) => {
   return res.status(200).json(user)
 });
 
+developer.post("/set/depiction", auth, async (req, res) => {
+  if (!req.user?.developer) return res.status(400).json({ success: false, error: "User is not a developer" });
+  if (!req.body.id) return res.status(400).json({ success: false, error: "Missing 'id' on request body." });
+  // if (!req.body.depiction) return res.status(400).json({ success: false, error: "Missing 'depiction' on request body." });
+  
+  //here we are checking for if the package exists and the user is the developer
+  const item = await pg("packages").select().where({ id: req.body.id, developer: req.user.id }).first();
+  if (!item) return res.status(400).json({ success: false, error: "Invalid Package requested to update depiction." });
+
+  let depiction;
+
+  try {
+    depiction = await (await fetch("https://pinpal.github.io/package/JoolPatch/SileoDepiction.json")).json();
+  } catch(e) {
+    console.log(e)
+    return res.status(400).json({ success: false, error: "Invalid depiction." });
+  }
+
+  try {
+    await pg("packages").where({ id: item.id }).update({
+      depiction: JSON.stringify(depiction)
+    });
+  } catch {
+    return res.status(400).json({ success: false, error: "Invalid depiction." });
+  }
+
+  return res.status(200).json({ success: true });
+});
+
 developer.post("/update/depiction", auth, async (req, res) => {
   if (!req.user?.developer) return res.status(400).json({ success: false, error: "User is not a developer" });
   if (!req.body.id) return res.status(400).json({ success: false, error: "Missing 'id' on request body." });
@@ -138,13 +186,13 @@ developer.post("/update/depiction", auth, async (req, res) => {
   const item = await pg("packages").select().where({ id: req.body.id, developer: req.user.id }).first();
   if (!item) return res.status(400).json({ success: false, error: "Invalid Package requested to update depiction." });
 
-  // try {
-  //   JSON.parse(req.body.depiction);
-  // } catch {
-  //   return res.status(400).json({ success: false, error: "Invalid depiction." });
-  // }
+  let depiction;
 
-  const depiction = await fs.readFile(path.join(__dirname, "./depiction.json"), "utf8");
+  try {
+    depiction = JSON.parse(req.body.depiction);
+  } catch {
+    return res.status(400).json({ success: false, error: "Invalid depiction." });
+  }
 
   try {
     await pg("packages").where({ id: item.id }).update({

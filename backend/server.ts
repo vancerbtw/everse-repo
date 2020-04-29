@@ -106,7 +106,6 @@ nextApp.prepare().then(async () => {
   });
 
   app.get("*", (req, res) => {
-    console.log(req.url)
     if (!req.url.includes("/./")) {
       return handle(req, res);
     }

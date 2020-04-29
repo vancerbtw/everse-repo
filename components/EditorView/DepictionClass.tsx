@@ -4,6 +4,7 @@ import HeaderView from "./DepictionClasses/Header";
 import SubheaderView from "./DepictionClasses/Subheader";
 import SeparatorView from "./DepictionClasses/Separator";
 import SpacerView from "./DepictionClasses/Spacer";
+import Markdown from "./DepictionClasses/Markdown";
 
 import theme from "../../includes/theme";
 
@@ -17,6 +18,7 @@ class DepictionClass extends React.Component {
     dragHandleProps?: any,
     onEdit: (item: any) => any,
     onDelete: () => any,
+    setDepiction: (depiction: any) => any,
     uneditable?: boolean,
     overPhone?: boolean,
     setDraggableState?: (bool: boolean) => any
@@ -26,13 +28,22 @@ class DepictionClass extends React.Component {
     isEditMode: false,
     isHovering: false,
     shouldLeave: true,
-    mouseIsInside: false
+    mouseIsInside: false,
+    previousItem: {
+      markdown: ""
+    }
+  }
+
+  componentDidMount() {
+    this.setState({
+      previousItem: {...this.props.item}
+    });
   }
 
   render() {
     return (
       <div
-      className={"block rounded-10dpx border-dotted px-10dpx relative transition flex flex-col justify-center" + (!this.props.uneditable && (this.props.isDragging || this.state.isEditMode || this.state.isHovering) ? " min-h-42dpx border-3dpx" : "") + (this.props.overPhone && !this.props.uneditable ? " py-12dpx" : "")}
+      className={"transition-all duration-500 ease-in-out block rounded-10dpx border-dotted px-10dpx relative transition flex flex-col justify-center" + (!this.props.uneditable && (this.props.isDragging || this.state.isEditMode || this.state.isHovering) ? " min-h-42dpx border-3dpx" : "") + (this.props.overPhone && !this.props.uneditable ? " py-12dpx" : "")}
       style={{
         borderColor: !this.props.uneditable && (this.props.isDragging || this.state.isEditMode || this.state.isHovering) ? this.props.themeColor || theme(this.props.theme).fg : theme(this.props.theme).bg,
         backgroundColor: !this.props.uneditable && (this.props.isDragging || this.state.isEditMode) && theme(this.props.theme).bg || "transparent"
@@ -40,11 +51,20 @@ class DepictionClass extends React.Component {
       onMouseEnter={e => !this.props.uneditable && this.setState({ isEditMode: true, isHovering: true, mouseIsInside: true })}
       onMouseLeave={e => {
         !this.props.uneditable && this.setState({ isEditMode: !this.state.shouldLeave || false, isHovering: !this.state.shouldLeave || false, mouseIsInside: false });
+
+        if (this.props.item.class == "DepictionMarkdownView") {
+          console.log(this.props.item.markdown);
+          console.log(this.state.previousItem.markdown);
+          if (this.props.item.markdown !== this.state.previousItem.markdown) {
+            this.setState({ previousItem: this.props.item });
+            this.props.onEdit(this.props.item);
+          }
+        }
       }}
       >
         {!this.props.uneditable && (
           <span
-          className={"block absolute right-0 top-0 flex z-1000" + (!this.props.uneditable ? " cursor-pointer" : "") + ((this.state.isEditMode || this.props.isDragging) ? "" : " hidden pointer-events-none")}
+          className={"block absolute right-0 top-0 flex z-1000 rounded-bl-10dpx" + (!this.props.uneditable ? " cursor-pointer" : "") + ((this.state.isEditMode || this.props.isDragging) ? "" : " hidden pointer-events-none")}
           style={{ backgroundColor: theme(this.props.theme).bg }}
           >
             <img className="h-36dpx w-36dpx p-8dpx opacity-50" src="/assets/move.svg" style={{ filter: this.props.theme === "light" ? "invert()" : "" }} {...this.props.dragHandleProps} />
@@ -71,7 +91,9 @@ class DepictionClass extends React.Component {
             "DepictionHeaderView": <HeaderView {...props} />,
             "DepictionSubheaderView": <SubheaderView {...props} />,
             "DepictionSeparatorView": <SeparatorView {...props} />,
-            "DepictionSpacerView": <SpacerView {...props} />
+            "DepictionSpacerView": <SpacerView {...props} />,
+            "DepictionMarkdownView": <Markdown {...props} setDepiction={this.props.setDepiction} />
+
           }
           return item[this.props.item.class] || <></>;
         })()}

@@ -1,14 +1,41 @@
 import React from "react";
+import { ColorFilter, Solver} from "../Color";
 import Color from "color";
 import { Scrollbar } from "react-scrollbars-custom";
-
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import DepictionEditor from "./DepictionEditor";
 import theme from "../../includes/theme";
+import e from "express";
+
+function hexToRgb(hex: string) {
+  // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+  const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+  hex = hex.replace(shorthandRegex, (m, r, g, b) => {
+    return r + r + g + g + b + b;
+  });
+
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? [
+      parseInt(result[1], 16),
+      parseInt(result[2], 16),
+      parseInt(result[3], 16),
+    ]
+    : null;
+}
+
+const reorder = (list: any, startIndex: number, endIndex: number) => {
+  const result = Array.from(list);
+  const [ removed ] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+  return result;
+};
 
 class EditorView extends React.Component {
   props: {
     theme: "dark" | "light"
     onUpdate: (depiction: any) => any
+    setDepiction: (depiction: any) => any
     depiction: any
     overPhone: boolean
     tintColor: string
@@ -17,16 +44,30 @@ class EditorView extends React.Component {
     icon: string
   } = this.props
 
-  state = {
+  state: any | { activeTabRef: Object } = {
     widthRelPx: 0,
     widthRel: 0,
-    activeTab: "Details",
+    activeTab: 0,
     indicatorWidth: 0,
     indicatorWidthCalc: 0,
     indicatorLeft: 0,
     indicatorLeftCalc: 0,
     scrollTop: -1,
-    scrollFollow: false
+    scrollFollow: false,
+    editHovering: false,
+    editing: false,
+    name: this.props.name,
+    developer: this.props.developer,
+    addTabHover: false,
+    addingNewTab: false,
+    newTabName: "",
+    activeTabRef: undefined
+  }
+
+  constructor(props: any) {
+    super(props);
+
+    this.focus = this.focus.bind(this);
   }
 
   scrollState = 0
@@ -37,6 +78,7 @@ class EditorView extends React.Component {
   } as any
 
   maxWidth = 500
+  textInput: HTMLInputElement | undefined;
 
   calculatePixels () {
     return Math.min(1, this.ref.MainView.current.clientWidth / this.maxWidth);
@@ -59,7 +101,11 @@ class EditorView extends React.Component {
     }
   }
 
+  prevTabs = [];
+
   componentDidMount () {
+    this.prevTabs = this.props.depiction.tabs;
+
     window.addEventListener("resize", this.listener.windowResize);
     setInterval(() => {
       this.listener.windowResize();
@@ -79,6 +125,10 @@ class EditorView extends React.Component {
     }, 10);
   }
 
+  focus() {
+    this.textInput?.focus();
+  }
+
   componentWillUnmount () {
     window.removeEventListener("resize", this.listener.windowResize);
   }
@@ -86,6 +136,12 @@ class EditorView extends React.Component {
   render() {
     return (
       <Scrollbar scrollTop={this.scrollState} onScroll={(ev: any) => {this.scrollState = ev.scrollTop; this.state.scrollTop !== -1 && this.setState({ scrollTop: ev.scrollTop })}}>
+        <div className="h-full w-full absolute z-1001" style={{ backgroundColor: this.state.editing ? "#4a4a4a" : "transparent", pointerEvents: this.state.editing ?  "all": "none", opacity: "0.4" }} onClick={() => {
+            this.setState({
+              editing: false
+            });
+            //post to webserver here to change the name and developer name
+          }}></div>
         <div
         className="block relative flex flex-col min-h-full text-white overflow-hidden transition"
         ref={this.ref.MainView as any}
@@ -126,66 +182,265 @@ class EditorView extends React.Component {
           >
             <div className="absolute w-full h-full left-0 top-0 z-80" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0) 70%)" }} />
           </div>
-          <div className="px-24dpx pt-24dpx pb-8dpx flex relative">
-            <div className="w-84dpx h-84dpx rounded-25 flex-shrink-0 user-select-none overflow-hidden">
-              <img className="w-full h-full" src={this.props.icon || "/assets/Wrench.svg"} />
-            </div>
-            <div className="pl-14dpx mt-8dpx mr-14dpx ml-0 mb-0 overflow-hidden flex-grow-0 w-full">
-              <h1 className="text-27dpx font-semibold font-display truncate">{this.props.name}</h1>
-              <p className="text-22dpx font-regular truncate opacity-35 mt-6dpx">{this.props.developer}</p>
-            </div>
-            <button
-            className="font-text flex-shrink-0 border-0 inline-block min-w-96dpx px-8dpx py-6dpx rounded-full my-auto text-22dpx font-semibold text-white text-center cursor-pointer"
-            style={{ backgroundColor: this.props.tintColor }}
-            >
-              GET
-            </button>
+          <div className={`px-24dpx pt-24dpx pb-8dpx flex relative`} onMouseEnter={() => {
+            if (!this.state.editing) {
+              this.setState({
+                editHovering: true
+              });
+            }
+          }} onMouseLeave={() => {
+            this.setState({
+              editHovering: false
+            });
+          }} onClick={() => {
+            this.setState({
+              editing: true
+            })
+          }}>
+            {
+              this.state.editing && <>
+              <div className="h-84dpx"></div>
+              <div className="absolute z-1002 flex flex-row"> 
+                <div className="w-84dpx h-84dpx rounded-25 flex-shrink-0 user-select-none overflow-hidden">
+                  <img className="w-full h-full" src={this.props.icon || "/assets/Wrench.svg"} />
+                </div>
+                <div className={`transition-all duration-250 ease-in-out pl-2 mt-auto mb-auto mr-2 ml-2 overflow-hidden flex-grow-0 rounded-10dpx w-1/2`} style={{
+                  border: `dotted ${this.state.editHovering ? this.props.tintColor: "transparent"}`
+                }}>
+                  <input
+                  placeholder="Text goes here..."
+                  value={this.state.name}
+                  onChange={ev => {
+                    if (ev.currentTarget.value === "") return;
+                    this.setState({ name: ev.currentTarget.value })
+                  }}
+                  className="border-none text-20dpx px-8dpx py-2dpx rounded-lg mb-4"
+                  style={{ backgroundColor: this.props.theme === "light" ? "#ffffff": "rgb(73, 73, 73)"}}
+                  />
+                  <input
+                  placeholder="Text goes here..."
+                  value={this.state.developer}
+                  onChange={ev => {
+                    if (ev.currentTarget.value === "") return;
+                    this.setState({ developer: ev.currentTarget.value })}
+                  }
+                  className="border-none text-20dpx px-8dpx py-2dpx rounded-lg"
+                  style={{ backgroundColor: this.props.theme === "light" ? "#ffffff": "rgb(73, 73, 73)"}}
+                  />
+                </div>
+                <button
+                className="font-text flex-shrink-0 border-0 inline-block min-w-96dpx px-8dpx py-6dpx rounded-full my-auto text-22dpx font-semibold text-white text-center cursor-pointer ml-5"
+                style={{ backgroundColor: this.props.tintColor }}
+                >
+                  GET
+                </button> 
+              </div> 
+              </> || <>
+                  <div className="w-84dpx h-84dpx rounded-25 flex-shrink-0 user-select-none overflow-hidden">
+                    <img className="w-full h-full" src={this.props.icon || "/assets/Wrench.svg"} />
+                  </div>
+                  <div className={`transition-all duration-250 ease-in-out pl-2 mt-8dpx mr-2 ml-2 overflow-hidden flex-grow-0 w-full rounded-10dpx cursor-pointer`} style={{
+                    border: `dotted ${this.state.editHovering ? this.props.tintColor: "transparent"}`
+                  }}>
+                    <h1 className="text-27dpx font-semibold font-display truncate">{this.props.name}</h1>
+                    <p className="text-22dpx font-regular truncate opacity-35 mt-6dpx">{this.props.developer}</p>
+                  </div>
+                  <button
+                  className="font-text flex-shrink-0 border-0 inline-block min-w-96dpx px-8dpx py-6dpx rounded-full my-auto text-22dpx font-semibold text-white text-center cursor-pointer"
+                  style={{ backgroundColor: this.props.tintColor }}
+                  >
+                    GET
+                  </button>
+              </>
+            }
           </div>
-          <div
-          className="flex flex-row relative px-18dpx justify-around mt-12dpx cursor-default font-sansT font-regular border-solid"
-          style={{ borderColor: Color(theme(this.props.theme).fg).alpha(0.125).toString(), borderBottomWidth: "calc(2px * var(--dpx))" }}
-          >
-            <div
-            className="block absolute h-2dpx bottom-n2dpx"
-            style={{ backgroundColor: this.props.tintColor, left: this.state.indicatorLeftCalc, width: this.state.indicatorWidthCalc, transition: "left .2s linear, width .2s ease" }}
-            />
-            {this.props.depiction.tabs.map((el: any) => (
-              <div
-              className="cursor-pointer text-23dpx block relative pt-0 pb-10dpx px-6dpx opacity-35 font-text"
-              key={"TabList_" + el.tabname}
-              {...(el.tabname === this.state.activeTab && { ref: this.ref.StartTab } || {}) as any}
-              onLoad={elm => el === this.state.activeTab && this.setState({ indicatorLeft: elm.currentTarget.offsetLeft, indicatorWidth: elm.currentTarget.clientWidth })}
-              onClick={elm => this.setState({
-                activeTab: el.tabname,
-                indicatorLeft: elm.currentTarget.offsetLeft / this.state.widthRelPx,
-                indicatorWidth: elm.currentTarget.clientWidth / this.state.widthRelPx,
-                indicatorLeftCalc: elm.currentTarget.offsetLeft,
-                indicatorWidthCalc: elm.currentTarget.clientWidth })}
-              style={{ ...(this.state.activeTab === el.tabname && { color: this.props.tintColor, opacity: 1 } || {}) }}
-              >
-                {el.tabname}
-              </div>
+            {!this.state.addingNewTab && (
+               <div
+               className="flex flex-row relative px-18dpx justify-around mt-12dpx cursor-default font-sansT font-regular border-solid"
+               style={{ borderColor: Color(theme(this.props.theme).fg).alpha(0.125).toString(), borderBottomWidth: "calc(2px * var(--dpx))" }}
+               >
+                 <div
+                 className="block absolute h-2dpx bottom-n2dpx"
+                 style={{ backgroundColor: this.props.tintColor, left: this.state.indicatorLeftCalc, width: this.state.indicatorWidthCalc, transition: "left .2s linear, width .2s ease" }}
+                 />
+              {this.props.depiction.tabs.map((el: any, index: number) => (
+                <div
+                className="cursor-pointer text-23dpx block relative pt-0 pb-10dpx px-6dpx opacity-35 hover:opacity-50 transition-all ease-out duration-75 font-text"
+                key={"TabList_" + el.tabname}
+                {...(index === this.state.activeTab && { ref: this.ref.StartTab } || {}) as any}
+                onLoad={elm => {
+                  if (this.state.activeTab != index) return;
+                  this.setState({
+                    indicatorLeft: elm.currentTarget.offsetLeft / this.state.widthRelPx,
+                    indicatorWidth: elm.currentTarget.clientWidth / this.state.widthRelPx,
+                    indicatorLeftCalc: elm.currentTarget.offsetLeft,
+                    indicatorWidthCalc: elm.currentTarget.clientWidth
+                  });
+                }}
+                onClick={elm => this.setState({
+                  activeTab: index,
+                  indicatorLeft: elm.currentTarget.offsetLeft / this.state.widthRelPx,
+                  indicatorWidth: elm.currentTarget.clientWidth / this.state.widthRelPx,
+                  indicatorLeftCalc: elm.currentTarget.offsetLeft,
+                  indicatorWidthCalc: elm.currentTarget.clientWidth 
+                })}
+                style={{ ...(this.state.activeTab === el.tabname && { color: this.props.tintColor, opacity: 1 } || {}) }}
+                >
+                  {el.tabname}
+                </div>
             ))}
+                <div className="cursor-pointer text-23dpx block relative pt-0 pb-10dpx px-6dpx opacity-35 font-text" onMouseEnter={() => {
+                  this.setState({
+                    addTabHover: true
+                  });
+                }} onMouseLeave={() => {
+                  this.setState({
+                    addTabHover: false
+                  });
+                }} onClick={() => {
+                  //this means we are adding a newTab
+                  
+                  this.setState({
+                    addingNewTab: true,
+                    newTabName: ""
+                  });
+                }}>
+                  <img src="/assets/edit.svg" style={{height: "calc(23px * var(--dpx))", width: "auto", opacity: this.state.addTabHover ? 1.0: 0.75, filter: this.props.theme === "light" ? "invert()": "none" }}  />
+                </div>
           </div>
-          {this.props.depiction.tabs.map((item: any, index: number) => item.tabname === this.state.activeTab && (
-            <div className={"w-full" + " DepictionView_" + item.tabname} key={"DepictionView_" + item.tabname}>
-              <DepictionEditor
-              theme={this.props.theme}
-              onUpdate={(views) => {
-                let tabs = [...this.props.depiction.tabs];
-                tabs[index] = { ...this.props.depiction.tabs[index], views };
-                this.props.onUpdate({ ...this.props.depiction, tabs });
-              }}
-              views={[...item.views]}
-              themeColor={this.props.tintColor}
-              widthRelPx={this.state.widthRelPx}
-              widthRel={this.state.widthRel}
-              onOpen={ev => this.setState({ scrollTop: ev && this.scrollState || -1 })}
-              scrollTop={this.state.scrollTop !== -1 && this.state.scrollTop || this.scrollState}
-              uneditable={!item.editable}
-              overPhone={this.props.overPhone}
-              />
-            </div>
+            ) || 
+              <div className="relative px-18dpx justify-around mt-12dpx cursor-default font-sansT font-regular border-solid relative z-1002">
+                <DragDropContext 
+                  onDragEnd={(result: any) => {
+                    this.setState({ currentBeingDragged: false });
+                    if (!result.destination) return;
+                    
+                    let depiction = {...this.props.depiction};
+                    depiction.tabs = reorder(
+                      depiction.tabs,
+                      result.source.index,
+                      result.destination.index
+                    );
+
+                    if (this.state.activeTab === result.source.index) this.setState({activeTab: result.destination.index})
+
+                    this.props.setDepiction(depiction);
+                  }}
+                  onBeforeDragStart={(ev) => {
+                    this.setState({ currentBeingDragged: ev.draggableId });
+                  }}
+                >
+                  <Droppable droppableId={"drag_drop_builder"} isCombineEnabled={false}>
+                    {(provided, snapshot) => (
+                      <div className="w-full flex flex-col items-center" style={{height: `calc(0.5rem + (2.5rem * ${this.props.depiction.tabs.length}))`}} {...provided.droppableProps} ref={provided.innerRef}>
+                      {
+                        this.props.depiction.tabs.map((item: any, index: number) => {
+                          return (
+                            <Draggable index={index} key={index} draggableId={"ddb_" + index}>
+                              {(provided, snapshot) => (
+                                <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                style={{ zIndex: 102, position: "relative", pointerEvents: (this.state.currentBeingDragged && this.state.currentBeingDragged !== "ddb_" + item._id) ? "none" : undefined, ...provided.draggableProps.style }}>
+                                  <div className="w-full mb-2 flex flex-row flex-start items-center">
+                                    <div className="w-10/12 h-10 overflow-hidden">
+                                      <input value={item.tabname} className="w-full h-full px-4 py-2 rounded-lg" onChange={(e) => {
+                                        let depiction = {...this.props.depiction};
+
+                                        depiction.tabs[index].tabname = e.currentTarget.value
+
+                                        this.props.setDepiction(depiction);
+                                      }} style={{backgroundColor: this.props.theme === "light" ? "rgb(221, 221, 221)": "#393939"}} />
+                                    </div>
+                                    <div className="w-10 h-10 flex flex-row flex-center ml-2 transform hover:scale-110 transition-all ease-in-out duration-150">
+                                      <img src="/assets/move.svg" className="h-8 my-auto cursor-pointer" {...provided.dragHandleProps} style={{filter: this.props.theme === "light" ? "invert()": "none", opacity: 0.75 }}/>
+                                    </div>
+                                    <div className="w-10 h-10 flex flex-row flex-center ml-2 transform hover:scale-110 transition-all ease-in-out duration-150" onClick={() => {
+                                      let depiction = {...this.props.depiction};
+                                      if (this.props.depiction.tabs.length <= 1) return;
+                                      depiction.tabs.splice(index, 1);
+                                      
+                                      this.props.onUpdate(depiction);
+                                    }}>
+                                      <img src="/assets/delete.svg" className="h-8 my-auto cursor-pointer" />
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          )
+                        })
+                      }
+                      {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+                <div
+                  className="flex justify-center cursor-pointer w-full" onClick={() => {
+                    let depiction = {...this.props.depiction};
+
+                    depiction.tabs.push({
+                      class: "DepictionStackView",
+                      tabname: "New Tab",
+                      views: []
+                    });
+
+                    this.props.setDepiction(depiction);
+                  }}
+                >
+                  <img
+                  src="/assets/add.svg"
+                  className="w-24dpx h-24dpx m-12dpx"
+                  style={{ filter: this.props.theme === "dark" ? "invert()" : "", opacity: this.state.addButtonHovered ? 1 : 0.4 }}
+                  />
+                </div>
+                <div className="flex justify-center cursor-pointer w-full mt-2 mb-2">
+                    <div className="mx-2 py-3 px-5 rounded-lg text-lg font-semibold transform hover:scale-110 transition-all duration-200 ease-in-out" style={{backgroundColor: this.props.theme === "light" ? "rgb(221, 221, 221)": "#393939"}} onClick={() => {
+                      this.props.onUpdate(this.props.depiction);
+
+                      this.setState({
+                        addingNewTab: false
+                      });
+                    }}>Save</div>
+                    <div className="mx-2 py-3 px-5 rounded-lg text-lg font-semibold transform hover:scale-110 transition-all duration-200 ease-in-out" style={{backgroundColor: this.props.theme === "light" ? "rgb(221, 221, 221)": "#393939"}} onClick={() => {
+                      this.setState({
+                        addingNewTab: false
+                      });
+                    }}>Cancel</div>
+                </div>
+              </div>
+            }
+          {this.props.depiction.tabs.map((item: any, index: number) => (index === this.state.activeTab && !this.state.addingNewTab) && (
+            <>
+            {this.state.addingNewTab &&
+                <div className="absolute w-full h-screen z-1001" onClick = {() => {
+                }}></div>
+            }
+              <div className={"w-full" + " DepictionView_" + item.tabname} key={"DepictionView_" + item.tabname}>
+                <DepictionEditor
+                theme={this.props.theme}
+                onUpdate={(views) => {
+                  let tabs = [...this.props.depiction.tabs];
+                  tabs[index] = { ...this.props.depiction.tabs[index], views };
+                  this.props.onUpdate({ ...this.props.depiction, tabs });
+                }}
+                views={[...item.views]}
+                themeColor={this.props.tintColor}
+                widthRelPx={this.state.widthRelPx}
+                widthRel={this.state.widthRel}
+                onOpen={ev => this.setState({ scrollTop: ev && this.scrollState || -1 })}
+                scrollTop={this.state.scrollTop !== -1 && this.state.scrollTop || this.scrollState}
+                uneditable={false}
+                overPhone={this.props.overPhone}
+                setDepiction={(views) => {
+                  let tabs = [...this.props.depiction.tabs];
+                  tabs[index] = { ...this.props.depiction.tabs[index], views };
+                  this.props.setDepiction({ ...this.props.depiction, tabs });
+                }}
+                />
+              </div>
+            </>
           ))}
         </div>
       </Scrollbar>

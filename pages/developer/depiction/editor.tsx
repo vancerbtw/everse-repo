@@ -2,6 +2,7 @@ import React from "react";
 import ColorPicker from "../../../components/ColorPicker";
 import PhoneFrame from "../../../components/PhoneFrame";
 import Logo from "../../../components/Logo";
+import {PrivateRoute} from "../../../components/PrivateRoute";
 import EditorView from "../../../components/EditorView";
 import {host} from "../../../backend/Helpers/Host";
 
@@ -10,19 +11,17 @@ import { theme2 } from "../../../includes/theme";
 let template = {
   "class": "DepictionTabView",
   "minVersion": "0.1",
-  "_tweakInfo": {
-    "icon": null,
-    "name": "Unnamed Tweak",
-    "author": "Unknown Developer",
-    "price": false
-  },
   "tintColor": "#2CB1BE",
   "tabs": [
     {
       "class": "DepictionStackView",
       "tabname": "Details",
-      "editable": true,
-      "views": []
+      "views": [
+        {
+          "class": "DepictionSubheaderView",
+          "title": "Nice!"
+        }
+      ]
     }
   ]
 };
@@ -39,7 +38,7 @@ interface DepictionTab {
 }
 
 class DepictionDesigner extends React.Component {
-  state: { name: string, developer: string, icon: string, fetched: boolean, tintColor: string, dark: boolean, colorOpen: boolean, depiction: any, overPhone: boolean, depictionLoad: { get: string | false, save: string | false } } = {
+  state: { saving: boolean, name: string, developer: string, icon: string, fetched: boolean, tintColor: string, dark: boolean, colorOpen: boolean, depiction: any, overPhone: boolean, depictionLoad: { get: string | false, save: string | false } } = {
     dark: false,
     colorOpen: false,
     depiction: {},
@@ -55,46 +54,66 @@ class DepictionDesigner extends React.Component {
     fetched: false,
     name: "",
     developer: "",
-    icon: ""
+    icon: "",
+    saving: false
   }
+
+  props: { 
+    user: {
+      success: Boolean,
+      name?: string,
+      email?: string,
+      verified?: Boolean,
+      disabled?: Boolean
+    }
+  } = this.props
 
   alreadyFetched = false
 
-  constructor(props: any) {
-    super(props);
+  onUpdate(updated: any) {
+    if (!this.state.saving) this.setState({ saving: true });
+
+    if (!updated.class) {
+      let color = updated.tintColor;
+      if (!color) return;
+      updated = this.state.depiction;
+      updated.tintColor = color;
+    }
+
+    this.setState({depiction: updated || this.state.depiction, tintColor: updated.tintColor || this.state.tintColor});
+    const queries = new URLSearchParams(window.location.search);
+    const id = queries.get("id");
+
+    fetch(`${host.repo}/developer/update/depiction`, {
+      method: "POST",
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("token")}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id, depiction: JSON.stringify(updated) })
+    }).then(async res => {
+      this.setState({ saving: false });
+    })
   }
 
-  onUpdate (updated: any) {
-    if (updated.tintColor) return this.setState({ tintColor: updated.tintColor });
-  }
-
-  componentWillUpdate() {
-    console.log(this.state)
+  setDepiction(depiction: any) {
+    this.setState({depiction});
   }
 
   componentDidMount () {
     const queries = new URLSearchParams(window.location.search);
     const id = queries.get("id") ? "id=" + queries.get("id") + "&": "";
     const item = queries.get("package") ? "package=" + queries.get("package"): "";
+    fetch(`${host.repo}/content/depiction?${id}${item}`).then(async res => {
+      let json = await res.json();
+      let depiction = json.depiction;
 
-    if (!this || !this.alreadyFetched) {
-      fetch(`${host.repo}/content/depiction?${id}${item}`).then(async res => {
-        let json = await res.json();
-        let depiction;
-
-        try {
-          depiction = JSON.parse(json.depiction);
-        } catch {
-          return;
-        }
-
-        const name: string = json.name;
-        const developer: string = json.developer;
-        const icon: string = json.icon;
-        this.setState({ depiction, tintColor: depiction.tintColor, fetched: true, name, developer, icon });
-        this.alreadyFetched = true;
-      });
-    }
+      const name: string = json.name;
+      const developer: string = json.developer;
+      const icon: string = json.icon;
+      this.setState({ depiction, tintColor: depiction.tintColor, fetched: true, name, developer, icon });
+      this.alreadyFetched = true;
+    });
 
     this.setState({ dark: (window.localStorage.getItem("ed_depiction_editor__dark_mode") === "true" || false) });
   }
@@ -115,6 +134,17 @@ class DepictionDesigner extends React.Component {
     if (this.state.depiction.class && this.state.fetched) {
       return (
         <>
+          {
+            this.state.saving && (
+              <div className="fixed w-full h-full overflow-hidden flex flex-col justify-end items-start pointer-events-none z-1002">
+                <div className="loading-dots mb-4 ml-4">
+                  <div className={`loading-dots--dot ml-1 loading-${this.state.dark ? "dark" : "light"}`}></div>
+                  <div className={`loading-dots--dot ml-1 loading-${this.state.dark ? "dark" : "light"}`}></div>
+                  <div className={`loading-dots--dot ml-1 loading-${this.state.dark ? "dark" : "light"}`}></div>
+                </div>
+              </div>
+            )
+          }
           <div
           className="flex relative p-5 w-full min-h-screen transition"
           style={{ backgroundColor: theme2(this.state.dark && "dark" || "light").bg }}
@@ -166,7 +196,7 @@ class DepictionDesigner extends React.Component {
               onMouseLeave={() => this.setState({ overPhone: false })}
               >
                 <PhoneFrame dark={this.state.dark}>
-                  <EditorView theme={this.state.dark ? "dark" : "light"} depiction={JSON.parse(JSON.stringify(this.state.depiction))} onUpdate={e => this.onUpdate(e)} overPhone={false && this.state.overPhone} tintColor={this.state.tintColor} name={this.state.name} developer={this.state.developer} icon={this.state.icon} />
+                  <EditorView theme={this.state.dark ? "dark" : "light"} depiction={JSON.parse(JSON.stringify(this.state.depiction))} onUpdate={e => this.onUpdate(e)} setDepiction={e => this.setDepiction(e)} overPhone={false && this.state.overPhone} tintColor={this.state.tintColor} name={this.state.name} developer={this.state.developer} icon={this.state.icon} />
                 </PhoneFrame>
               </div>
               <div className="flex flex-row mt-8 w-full items-center">
@@ -194,5 +224,5 @@ class DepictionDesigner extends React.Component {
   }
 }
 
-export default DepictionDesigner;
+export default PrivateRoute(DepictionDesigner);
 

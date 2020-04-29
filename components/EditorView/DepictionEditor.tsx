@@ -24,6 +24,7 @@ class EditorView extends React.Component {
     theme: "dark" | "light"
     views: any
     onUpdate: (views: any) => any
+    setDepiction: (depiction: any) => any
     widthRelPx: number
     widthRel: number
     themeColor: string
@@ -89,6 +90,11 @@ class EditorView extends React.Component {
                                 let items = this.props.views;
                                 items[index] = item;
                                 this.props.onUpdate(items);
+                              }}
+                              setDepiction={(item) => {
+                                let items = this.props.views;
+                                items[index] = item;
+                                this.props.setDepiction(items)
                               }}
                               />
                             </div>
@@ -176,7 +182,10 @@ class EditorView extends React.Component {
               item={item}
               isDragging={false}
               onDelete={() => {}}
-              onEdit={() => {}}
+              onEdit={() => {
+                console.log("edit")
+              }}
+              setDepiction={this.props.setDepiction}
               />
             ))}
           </div >

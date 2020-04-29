@@ -305,6 +305,7 @@ module.exports = {
     inset: theme => ({
       '0': '0',
       auto: 'auto',
+      '1/2rem': '0.5rem',
       ...theme("spacing")
     }),
     letterSpacing: {
@@ -469,7 +470,9 @@ module.exports = {
       "99": 99,
       "100": 100,
       "101": 101,
-      "1000": 1000
+      "1000": 1000,
+      "1001": 1001,
+      "1002": 1002
     },
     gap: theme => theme('spacing'),
     gridTemplateColumns: {
