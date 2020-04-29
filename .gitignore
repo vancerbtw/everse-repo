@@ -4,3 +4,4 @@ node_modules
 backend/packages
 dist
 _next
+backend/Data

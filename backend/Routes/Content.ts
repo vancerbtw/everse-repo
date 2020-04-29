@@ -6,6 +6,8 @@ import Ping from "../Helpers/Ping";
 import fs from "fs-extra";
 import jwt from "jsonwebtoken";
 import fetch from "node-fetch";
+import moment from "moment";
+import { IoT1ClickProjects } from "aws-sdk";
 
 export const content = express.Router();
 
@@ -28,14 +30,22 @@ class CacheTracker {
   }[];
   private requestTotal: number;
   private ping: any;
+  private round: number;
+  private roundIndex: number;
 
   constructor() {
     this.files = [];
     this.caches = [];
-    this.endpoints = [];
     this.requestTotal = 0;
     this.shouldUpdate = false;
     this.ping = new Ping();
+    this.round = 0;
+    this.roundIndex= 0;
+    fs.readFile(path.join(__dirname, `../Config/endpoints.json`)).then((data) => this.endpoints = JSON.parse(data.toString()).active);
+  }
+
+  getEndpointLength() {
+    return this.endpoints.length;
   }
 
   resetUpdate():void {
@@ -115,10 +125,12 @@ class CacheTracker {
     //here we send cached files to be removed to endpoint and refresh the endpoints that we have available to take user requests
     let endpoints: {
       active: {
-        endpoint: string
+        endpoint: string,
+        last: string
       }[],
       failed: {
-        endpoint: string
+        endpoint: string,
+        last: string
       }[]
     } = {
       active: [],
@@ -133,51 +145,87 @@ class CacheTracker {
 
     for (let i = 0; i < endpoints.active.length; i++) {
       const element = endpoints.active[i];
+      
+      element.last = moment().utc().format();
 
       try {
-        await this.ping.check(element);
+        await this.ping.check(element.endpoint);
       } catch {
-        try {
+      //   // try {
           endpoints.failed.push(element)
           endpoints.active.splice(i, 1);
 
-          let discordRes = await (await fetch("https://discordapp.com/api/webhooks/704870450009735281/Izh9sTyrbwPJsk29DtN5IEXgW08_0jDz6mOMh-sLjXqPo8m7vmYBu9VlNOg2aiJWxQZ9")).json();
+      //     console.log(element.endpoint);
 
-          var d = new Date,
-          dformat = [d.getMonth()+1,
-          d.getDate(),
-          d.getFullYear()].join('/')+' '+
-          [d.getHours(),
-          d.getMinutes(),
-          d.getSeconds()].join(':');
+      //   //   let discordRes = await (await fetch("https://discordapp.com/api/webhooks/704870450009735281/Izh9sTyrbwPJsk29DtN5IEXgW08_0jDz6mOMh-sLjXqPo8m7vmYBu9VlNOg2aiJWxQZ9")).json();
+
+      //   //   var d = new Date,
+      //   //   dformat = [d.getMonth()+1,
+      //   //   d.getDate(),
+      //   //   d.getFullYear()].join('/')+' '+
+      //   //   [d.getHours(),
+      //   //   d.getMinutes(),
+      //   //   d.getSeconds()].join(':');
             
-          await fetch(`https://discordapp.com/api/webhooks/${discordRes.id}/${discordRes.token}`, {
-            method: "POST",
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              "username": "WatchBot",
-              "content": "@here",
-              "embeds": [
-                {
-                  "title": "Server Ping Command Failed",
-                  "description": `Ping failed on '${element.endpoint}'`,
-                  "color": 13970176,
+      //   //   await fetch(`https://discordapp.com/api/webhooks/${discordRes.id}/${discordRes.token}`, {
+      //   //     method: "POST",
+      //   //     headers: {
+      //   //       'Content-Type': 'application/json'
+      //   //     },
+      //   //     body: JSON.stringify({
+      //   //       "username": "WatchBot",
+      //   //       "content": "@here",
+      //   //       "embeds": [
+      //   //         {
+      //   //           "title": "Server Ping Command Failed",
+      //   //           "description": `Ping failed on '${element.endpoint}'`,
+      //   //           "color": 13970176,
       
-                }
-              ]
-            })
-          });
-        } catch(e) {
-          console.log(e)
-        }
+      //   //         }
+      //   //       ]
+      //   //     })
+      //   //   });
+      //   // } catch(e) {
+      //   //   console.log(e)
+      //   // }
       }
     }
 
     this.endpoints = endpoints.active;
 
     await fs.writeFile(path.join(__dirname, `../Config/endpoints.json`), JSON.stringify(endpoints));
+
+    let date = moment();
+    let year = date.year();
+    let day = date.dayOfYear();
+    let hour = date.hour();
+    let minute = date.minute();
+
+    try {
+      await fs.mkdirp(path.join(__dirname, `../Data/${year}/${day}/${hour}`));
+
+      await fs.writeFile(path.join(__dirname, `../Data/${year}/${day}/${hour}/${minute}.json`), JSON.stringify({
+        "caches": this.caches,
+        "rounds": this.round
+      }));
+
+      this.caches = []
+    } catch(e) {
+      console.log(e);
+    } 
+  }
+
+  getEndpoint(): string {
+    this.roundIndex++;
+    if (this.roundIndex >= this.endpoints.length) {
+      this.roundIndex = 0;
+      this.round++;
+    }
+
+    console.log(this.endpoints);
+    console.log(this.roundIndex)
+
+    return this.endpoints[this.roundIndex].endpoint;
   }
 }
 
@@ -198,7 +246,7 @@ content.get("/updateCache", async (req, res) => {
 
 content.get("/v1/:pkg/:version/", async (req, res) => {
   //here we will check all the package perms
-
+  if (cache.getEndpointLength() <= 0) return res.status(400).send("No CDN server available");
   /*
   When cydia is requesting to download a file it will have 2 headers on the request
   (There is probably more that are unique to cydia but there are only 2 that we care about)
@@ -208,9 +256,9 @@ content.get("/v1/:pkg/:version/", async (req, res) => {
   x-machine - the model of the device
 
   */
-  if (!req.header("x-unique-id")) return res.status(400).send("Missing the 'x-unique-id' header on the request.");
+  // if (!req.header("x-unique-id")) return res.status(400).send("Missing the 'x-unique-id' header on the request.");
 
-  if (!req.header("x-machine")) return res.status(400).send("Missing the 'x-machine' header on the request.")
+  // if (!req.header("x-machine")) return res.status(400).send("Missing the 'x-machine' header on the request.")
 
   const file = await pg("files").select().innerJoin("uploads", "files.file", "uploads.id").where({ package: req.params.pkg, version: req.params.version }).first();
 
@@ -248,11 +296,13 @@ content.get("/v1/:pkg/:version/", async (req, res) => {
 
   let token = jwt.sign({ 
     file: file.identifier,
-    pkg: req.params.pkg,
-    cache: shouldCache
+    cache: shouldCache,
+    exp: Date.now() + 180000
   }, process.env.JWT_SECRET || "");
 
-  return res.status(200).redirect(`https://cdn.everse.dev/${token}`);
+  let endpoint = cache.getEndpoint();
+
+  return res.status(302).redirect(`http://${endpoint}/${req.params.pkg}_${req.params.version}_${file.architecture}.deb?token=${token}`);
 });
 
 content.get("/depiction", async (req, res) => {

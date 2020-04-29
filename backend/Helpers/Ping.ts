@@ -1,24 +1,20 @@
-import ping from "net-ping";
+import ping from "ping";
 
 
 export default class Ping {
-  private session: any;
-
-  constructor() {
-    this.session = ping.createSession();
-  }
-
   check(endpoint: string) {
-    return new Promise<any>(
-      (resolve, reject) => {
-        this.session.pingHost(endpoint, function (e: any) {
-          if (e) {
-            reject()
-          } else {
-            resolve()
-          }
+    return new Promise<any>((resolve, reject) => {
+      console.log(endpoint)
+      ping.promise.probe(endpoint, {
+        timeout: 10,
+        extra: ['-i', '2'],
+    }).then((res) => {
+        if (res.alive) {
+          resolve(res);
+        } else {
+          reject(res)
+        }
       });
-     }
-   );
+    });
   }
 }
