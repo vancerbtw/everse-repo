@@ -47,7 +47,7 @@ class EditorView extends React.Component {
 
   render() {
     return (
-      <div className="flex flex-col pb-64dpx">
+      <div className="DepictionEditor flex flex-col pb-64dpx">
         {!this.props.uneditable && (
           <>
             <DragDropContext 

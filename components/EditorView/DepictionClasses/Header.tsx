@@ -57,7 +57,7 @@ class Header extends React.Component {
             />
           </div>
         ) || (
-          <div className="py-10px">
+          <div className="py-10dpx">
             <p
             className={
               "text-29dpx max-w-full truncate"

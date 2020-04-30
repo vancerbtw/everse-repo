@@ -276,7 +276,7 @@ export default class Depiction extends React.Component<DepictionProps, Depiction
           <div className="cydia-banner">
             <h3 className="cydia-text">{this.state.bannerText}</h3>
             <div className="cydia-button" onClick={() => {
-                fetch(`http://192.168.7.50:3004/sessions/disable`,  {
+                fetch(`http://${host.self}/sessions/disable`,  {
                   method: "post",
                   body: JSON.stringify({ token: new URLSearchParams(window.location.search).get("token") }),
                   headers: {
@@ -307,7 +307,7 @@ export default class Depiction extends React.Component<DepictionProps, Depiction
           <div className="cydia-banner">
             <h3 className="cydia-text">{this.state.bannerText}</h3>
             <div className="cydia-button"> 
-              <a className="priceButton" href={"http://192.168.7.50:3004/device/auth?token=" + new URLSearchParams(window.location.search).get("token") + "&package=" + this.state.identifier}>Login</a>
+              <a className="priceButton" href={`http://${host.self}/device/auth?token=` + new URLSearchParams(window.location.search).get("token") + "&package=" + this.state.identifier}>Login</a>
             </div>
           </div>
         );

@@ -44,20 +44,20 @@ html {
 }
 .react-resizable-handle {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: calc(20px * var(--dpx));
+  height: calc(20px * var(--dpx));
   box-sizing: border-box;
 }
 .react-resizable-handle::after {
   position: absolute;
-  width: 10px;
-  height: 10px;
+  width: calc(10px * var(--dpx));
+  height: calc(10px * var(--dpx));
   bottom: 0;
   right: 0;
   content: "";
   box-sizing: border-box;
   border: solid currentColor;
-  border-width: 0 2px 2px 0;
+  border-width: 0 calc(2px * var(--dpx)) calc(2px * var(--dpx)) 0;
   opacity: 0.5;
 }
 .react-resizable-handle-sw {
@@ -116,157 +116,152 @@ html {
   display: none;
 }
 
-.mde-tabs {
+.DepictionEditor .mde-tabs {
   display: none !important;
 }
 
-.mde-header-light {
+.DepictionEditor .mde-header-light {
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: calc(16px * var(--dpx));
   background-color: #ededed !important;
-  border-radius: .5rem !important;
+  border-radius: calc(8px * var(--dpx)) !important;
   border: none !important;
-  margin-top: 1.5rem;
+  margin-top: calc(24px * var(--dpx));
 }
 
-.mde-header-dark {
+.DepictionEditor .mde-header-dark {
   justify-content: space-around;
-  margin-bottom: 1rem;
+  margin-bottom: calc(16px * var(--dpx));
   background-color: #393939 !important;
-  border-radius: .5rem !important;
+  border-radius: calc(8px * var(--dpx)) !important;
   border: none !important;
-  margin-top: 1.5rem;
+  margin-top: calc(24px * var(--dpx));
 }
 
-.mde-header-dark button {
+.DepictionEditor .mde-header-dark button {
   color: #757576 !important;
 }
 
-.mde-header-dark .react-mde-dropdown {
+.DepictionEditor .mde-header-dark .react-mde-dropdown {
   background-color: #272727 !important;
-  border-radius: .35rem;
+  border-radius: calc(5.6px * var(--dpx));
   border-width: 1px !important;
   border-color: #757576 !important;
 } 
 
-.mde-header-dark .react-mde-dropdown::after {
+.DepictionEditor .mde-header-dark .react-mde-dropdown::after {
   border-bottom-color: #b4b4b4 !important;
 }
 
-.react-mde {
+.DepictionEditor .react-mde {
   border: none !important;
-  border-radius: 1rem !important;
+  border-radius: calc(16px * var(--dpx)) !important;
 }
 
-.mde-text-light {
+.DepictionEditor .mde-text-light {
   background-color: #ededed;
-  border-radius: .75rem !important;
+  border-radius: calc(12px * var(--dpx)) !important;
 }
 
-.mde-text-dark {
+.DepictionEditor .mde-text-dark {
   background-color: #393939;
-  border-radius: .75rem !important;
+  border-radius: calc(12px * var(--dpx)) !important;
 }
 
-.py-05 {
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
-}
-
-.markdown * {
+.DepictionEditor .markdown * {
   border: none;
 }
 
-.markdown {
+.DepictionEditor .markdown {
   @apply leading-normal break-words;
 }
 
-.markdown > * + * {
-  @apply mt-0 mb-4;
+.DepictionEditor .markdown > * + * {
+  @apply mt-0 mb-4dpx;
 }
 
-.markdown li + li {
-  @apply mt-1;
+.DepictionEditor .markdown li + li {
+  @apply mt-1dpx;
 }
 
-.markdown li > p + p {
-  @apply mt-6;
+.DepictionEditor .markdown li > p + p {
+  @apply mt-6dpx;
 }
 
-.markdown strong {
+.DepictionEditor .markdown strong {
   @apply font-semibold;
 }
 
-.markdown a {
+.DepictionEditor .markdown a {
   @apply text-blue-600 font-semibold;
 }
 
-.markdown strong a {
+.DepictionEditor .markdown strong a {
   @apply font-bold;
 }
 
-.markdown h1 {
-  @apply leading-tight border-b text-4xl font-semibold mb-4 mt-6 pb-2;
+.DepictionEditor .markdown h1 {
+  @apply leading-tight border-b-1dpx text-4xl font-semibold mb-4 mt-6 pb-2;
 }
 
-.markdown h2 {
-  @apply leading-tight border-b text-2xl font-semibold mb-4 mt-6 pb-2;
+.DepictionEditor .markdown h2 {
+  @apply leading-tight border-b-1dpx text-2xl font-semibold mb-4 mt-6 pb-2;
 }
 
-.markdown h3 {
-  @apply leading-snug text-lg font-semibold mb-4 mt-6;
+.DepictionEditor .markdown h3 {
+  @apply leading-snug text-18dpx font-semibold mb-4 mt-6;
 }
 
-.markdown h4 {
-  @apply leading-none text-base font-semibold mb-4 mt-6;
+.DepictionEditor .markdown h4 {
+  @apply leading-none text-16dpx font-semibold mb-4 mt-6;
 }
 
-.markdown h5 {
-  @apply leading-tight text-sm font-semibold mb-4 mt-6;
+.DepictionEditor .markdown h5 {
+  @apply leading-tight text-14dpx font-semibold mb-4 mt-6;
 }
 
-.markdown h6 {
-  @apply leading-tight text-sm font-semibold text-gray-600 mb-4 mt-6;
+.DepictionEditor .markdown h6 {
+  @apply leading-tight text-14dpx font-semibold text-gray-600 mb-4 mt-6;
 }
 
-.markdown blockquote {
-  @apply text-base border-l-4 border-gray-300 pl-4 pr-4 text-gray-600;
+.DepictionEditor .markdown blockquote {
+  @apply text-base border-l-4dpx border-gray-300 pl-4dpx pr-4dpx text-gray-600;
 }
 
-.markdown code {
-  @apply font-mono text-sm inline bg-gray-200 rounded px-1 py-05;
+.DepictionEditor .markdown code {
+  @apply font-mono text-14dpx inline bg-gray-200 rounded px-1dpx py-2dpx;
 }
 
-.markdown pre {
-  @apply bg-gray-100 rounded p-4;
+.DepictionEditor .markdown pre {
+  @apply bg-gray-100 rounded-4dpx p-4dpx;
 }
 
-.markdown pre code {
+.DepictionEditor .markdown pre code {
   @apply block bg-transparent p-0 overflow-visible rounded-none;
 }
 
-.markdown ul {
-  @apply text-base pl-8 list-disc;
+.DepictionEditor .markdown ul {
+  @apply text-base pl-8dpx list-disc;
 }
 
-.markdown ol {
-  @apply text-base pl-8 list-decimal;
+.DepictionEditor .markdown ol {
+  @apply text-base pl-8dpx list-decimal;
 }
 
-.markdown kbd {
-  @apply text-xs inline-block rounded border px-1 py-05 align-middle font-normal font-mono shadow;
+.DepictionEditor .markdown kbd {
+  @apply text-xs inline-block rounded border px-1dpx py-2dpx align-middle font-normal font-mono shadow;
 }
 
-.markdown table {
+.DepictionEditor .markdown table {
   @apply text-base border-gray-600;
 }
 
-.markdown th {
-  @apply border py-1 px-3;
+.DepictionEditor .markdown th {
+  @apply border py-1dpx px-3dpx;
 }
 
-.markdown td {
-  @apply border py-1 px-3;
+.DepictionEditor .markdown td {
+  @apply border py-1dpx px-3dpx;
 }
 
 /* Override pygments style background color. */

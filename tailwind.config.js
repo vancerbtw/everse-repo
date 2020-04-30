@@ -153,6 +153,7 @@ module.exports = {
       "2dpx": "calc(2px * var(--dpx))",
       "3dpx": "calc(3px * var(--dpx))",
       "4dpx": "calc(4px * var(--dpx))",
+      "5dpx": "calc(5px * var(--dpx))",
       "6dpx": "calc(6px * var(--dpx))",
       "8dpx": "calc(8px * var(--dpx))",
       "10dpx": "calc(10px * var(--dpx))",
@@ -208,7 +209,9 @@ module.exports = {
       '2': '2px',
       '4': '4px',
       '8': '8px',
-      "3dpx": "calc(3px * var(--dpx))"
+      "1dpx": "calc(1px * var(--dpx))",
+      "3dpx": "calc(3px * var(--dpx))",
+      "4dpx": "calc(4px * var(--dpx))"
     },
     boxShadow: {
       xs: '0 0 0 1px rgba(0, 0, 0, 0.05)',

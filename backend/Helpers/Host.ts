@@ -1,4 +1,4 @@
 export const host = {
-  self: "http://192.168.7.50:3004",
-  repo: "http://192.168.7.50:3000"
+  self: "http://localhost:3001",
+  repo: "http://localhost:3000"
 }

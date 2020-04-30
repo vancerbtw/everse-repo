@@ -206,7 +206,7 @@ export default class Preview extends React.Component<DepictionProps, DepictionSt
                                         provided.draggableProps.style
                                       )}
                                     >
-                                      <ViewLoader view={view} showScreenshots={this.showScreenshots} provided={provided} snapshot={snapshotDraggable} />
+                                      <ViewLoader view={view} showScreenshots={this.showScreenshots} { ...{ provided: provided, snapshot: snapshotDraggable } as any } />
                                     </div>
                                   )}
                                 </Draggable>

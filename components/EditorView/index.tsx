@@ -1,11 +1,10 @@
 import React from "react";
-import { ColorFilter, Solver} from "../Color";
+import { ColorFilter, Solver } from "../Color";
 import Color from "color";
 import { Scrollbar } from "react-scrollbars-custom";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import DepictionEditor from "./DepictionEditor";
 import theme from "../../includes/theme";
-import e from "express";
 
 function hexToRgb(hex: string) {
   // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")

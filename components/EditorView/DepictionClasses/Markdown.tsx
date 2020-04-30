@@ -39,7 +39,7 @@ class Markdown extends React.Component {
             />
           </div>
         ) || (
-          <div className="py-10px markdown">
+          <div className="py-10dpx markdown">
            <MarkdownView markdown={this.props.item.markdown}/>
           </div>
         )}
