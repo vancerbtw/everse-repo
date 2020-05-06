@@ -7,7 +7,6 @@ import { join } from "path";
 import { debScan } from "../Helpers/DebScan";
 import { generatePackages } from "../Helpers/Packages";
 import { space } from "../Helpers/Spaces";
-import randomstring from "randomstring";
 import fetch from "node-fetch";
 import { removeUserDevices, removeDevice, addDevice, getDevices, getUser } from "../Helpers/Device";
 

@@ -213,6 +213,30 @@ class CacheTracker {
     } catch(e) {
       console.log(e);
     } 
+    
+    if (invalids.length <= 0) {
+      for (let i = 0; i < this.endpoints.length; i++) {
+        const endpoint = this.endpoints[i].endpoint;
+  
+        const token = jwt.sign({ 
+          file: ".CACHE-CONTROL",
+          exp: Date.now() + 60000,
+          caches: invalids
+        }, process.env.JWT_SECRET || "");
+        try {
+          let json = await (await fetch(`https://${endpoint}/.CACHE-CONTROL?token=${token}`, {
+            method: "POST"
+          })).json();
+  
+          if (json.status != "ok") {
+            throw new Error("Status is not ok on response from endpoint");
+          }
+        } catch(e) {
+          console.log(e);
+          console.log("Failed to post to endpoint clearing cache");
+        }
+      }
+    }
   }
 
   getEndpoint(): string {
@@ -221,9 +245,6 @@ class CacheTracker {
       this.roundIndex = 0;
       this.round++;
     }
-
-    console.log(this.endpoints);
-    console.log(this.roundIndex)
 
     return this.endpoints[this.roundIndex].endpoint;
   }
@@ -270,14 +291,16 @@ content.get("/v1/:pkg/:version/", async (req, res) => {
 
   if (item.paid) {
     //we are getting the user that this device belongs to
-    const user = await getUser(req.header("x-unique-id")!, req.header('x-machine')!);
+    const user = await getUser(req.header("x-unique-id") || "", req.header('x-machine') || "");
 
     //if there is no user then this device has not been linked to an account
     if (!user) return res.status(400).send("This device is not linked with an account, please sign in.");
 
-    const purchase = await pg("purchases").select().where({ purchase_item: item.id, user_id: user.id }).first();
+    const inventory = await pg("inventories").select().where({ user_id: user.id }).first();
+
+    if (!inventory) return res.status(400).send("You do not own this package.");
   
-    if (!purchase) return res.status(400).send("You do not own this package.");
+    if (!inventory.items.includes(file.package)) return res.status(400).send("You do not own this package.");
   }
 
   let shouldCache = false;
@@ -294,15 +317,18 @@ content.get("/v1/:pkg/:version/", async (req, res) => {
     time: new Date()
   });
 
-  let token = jwt.sign({ 
+  let priority = cache.caches.filter((cache) => cache.fileName === file.identifier).length / cache.caches.length;
+
+  const token = jwt.sign({ 
     file: file.identifier,
     cache: shouldCache,
+    priority,
     exp: Date.now() + 180000
   }, process.env.JWT_SECRET || "");
 
   let endpoint = cache.getEndpoint();
 
-  return res.status(302).redirect(`http://${endpoint}/${req.params.pkg}_${req.params.version}_${file.architecture}.deb?token=${token}`);
+  return res.status(302).redirect(`https://${endpoint}/${req.params.pkg}_${req.params.version}_${file.architecture}.deb?token=${token}`);
 });
 
 content.get("/depiction", async (req, res) => {

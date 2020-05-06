@@ -7,6 +7,7 @@ import path from "path";
 import fs from "fs-extra";
 import jwt from "jsonwebtoken";
 import { gzip } from "./Helpers/Compress";
+import rateLimit from "express-rate-limit";
 
 //route imports
 import { content } from "./Routes/Content";
@@ -41,6 +42,14 @@ nextApp.prepare().then(async () => {
   app.use("/content", content);
   app.use("/developer", developer);
   app.use("/sessions", sessions);
+
+  const apiLimiter = rateLimit({
+    windowMs: 60 * 1000, // 15 minutes
+    max: 150
+  });
+   
+  // only apply to requests that begin with /api/
+  app.use("/content/", apiLimiter);
 
   app.get('/./Packages', async (req, res) => {
     let packages = undefined;
